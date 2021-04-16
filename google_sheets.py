@@ -1,3 +1,5 @@
+from typing import List, Dict
+
 from oauth2client.service_account import ServiceAccountCredentials
 from googleapiclient.discovery import build
 import pandas as pd
@@ -5,72 +7,88 @@ import pandas as pd
 
 class GoogleSheetsClient:
     def __init__(self, creds: dict, scope: list):
+        """
+        Google Sheets API access constructor
+
+        :param creds credentials obtained from Google Cloud Platform
+        :param scope API service endpoint, "https://www.googleapis.com/auth/spreadsheets"
+        """
+
         self.creds = ServiceAccountCredentials.from_json_keyfile_dict(creds, scope)
         self.service = build("sheets", "v4", credentials=self.creds)
         self.sheet = self.service.spreadsheets()
 
-    def get_single_sheet(self, sheets_url: str, sheet_name: str) -> list:
+    def get_single_sheet_as_dict(self, spreadsheet_id: str, sheet_name: str) -> Dict:
         """
-        Reads and returns wanted sheet as List
-        :param sheets_url: Google sheets url
-        :param sheet_name: Name of the sheet we want to read
+        Returns wanted sheet as dict
+        :param spreadsheet_id: Google sheets url
+        :param sheet_name: Name of the sheet we want to convert to dict
         """
-        full_sheet = f"{sheet_name}" + "!A1:G4"  # change range as needed
+
+        full_sheet = f"{sheet_name}" + "!A1:G100"  # change range as needed
 
         response = (
             self.sheet.values()
-            .get(spreadsheetId=sheets_url, majorDimension="ROWS", range=full_sheet)
+            .get(spreadsheetId=spreadsheet_id, majorDimension="ROWS", range=full_sheet)
             .execute()
         )
 
-        return response.get("values", [])
+        sheet_as_dict = []
 
-    def get_single_sheet_as_df(self, sheets_url: str, sheet_name: str) -> pd.DataFrame:
+        all_rows = response.get("values", [])
+        column_row = all_rows[0]  # the first row is the column row
+
+        for row in all_rows[1:]:
+            row_dict = {}
+            # populate row_dict with col: val pairs
+            for i, val in enumerate(row):
+                # a value at position i corresponds to the column of position i
+                col = column_row[i]
+                row_dict[col] = val
+
+            if len(row_dict) > 1:  # eliminates rows without values
+                sheet_as_dict.append(row_dict)
+
+        return sheet_as_dict
+
+    def get_single_sheet_as_df(
+        self, spreadsheet_id: str, sheet_name: str
+    ) -> pd.DataFrame:
         """
         Returns wanted sheet as Pandas DataFrame
-        :param sheets_url: Google sheets url
+        :param spreadsheet_id: Google sheets url
         :param sheet_name: Name of the sheet we want to convert to PandasDataFrame
         """
-        sheet_data = self.get_single_sheet(sheets_url, sheet_name)
+        sheet_data = self.get_single_sheet_as_dict(spreadsheet_id, sheet_name)
 
-        df = pd.DataFrame(data=sheet_data[1:], columns=sheet_data[0])
+        df = pd.DataFrame(data=sheet_data, columns=sheet_data[0])
+
         return df
 
-    def get_single_sheet_as_dict(self, sheets_url: str, sheet_name: str) -> dict:
-        """
-        Returns wanted sheet as dict
-        :param sheets_url: Google sheets url
-        :param sheet_name: Name of the sheet we want to convert to dict
-        """
-        data = self.get_single_sheet(sheets_url, sheet_name)
-
-        sheet_dict = {}
-        key = f"{sheet_name}"
-        for a in data[1:]:
-            sheet_dict.setdefault(key, [])
-            sheet_dict[key].append(a)
-
-        return sheet_dict
-
-    def get_entire_sheet(self, sheets_url: str, *args: str) -> dict:
+    def get_all_sheets_as_dicts(self, spreadsheet_id: str, *args: str) -> List[Dict]:
         """
         Returns all wanted sheets as dict
-        :param sheets_url: Google sheets url
+        :param spreadsheet_id: Google sheets url
         :param args: Name of sheets we want to convert to dict
         """
         sheet_names = list(args)
-        sheet_range = "!A1:G4"  # change range as needed
-        full_sheet_names = [x + sheet_range for x in sheet_names]
-
-        response = (
-            self.service.spreadsheets()
-            .values()
-            .batchGet(spreadsheetId=sheets_url, ranges=full_sheet_names)
-            .execute()
-        )
 
         sheets_dict = {}
-        for item in response.get("valueRanges", []):
-            sheets_dict[item["range"]] = item["values"]
+        for sheet_name in sheet_names:
+            sheets_dict[sheet_name] = self.get_single_sheet_as_dict(
+                spreadsheet_id, sheet_name
+            )
 
         return sheets_dict
+
+    def get_all_sheets_as_dfs(self, spreadsheet_id: str, *args: str) -> pd.DataFrame:
+        """
+        Returns all wanted sheets as dict
+        :param spreadsheet_id: Google sheets url
+        :param args: Name of sheets we want to convert to dict
+        """
+
+        data = self.get_all_sheets_as_dicts(spreadsheet_id, *args)
+        df = pd.DataFrame({key: pd.Series(value) for key, value in data.items()})
+
+        return df
