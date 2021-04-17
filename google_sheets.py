@@ -65,9 +65,11 @@ class GoogleSheetsClient:
 
         return df
 
-    def get_all_sheets_as_dicts(self, spreadsheet_id: str, *args: str) -> List[Dict]:
+    def get_all_sheets_as_dicts(
+        self, spreadsheet_id: str, *args: str
+    ) -> Dict[str, Dict]:
         """
-        Returns all wanted sheets as dict
+        Returns all wanted sheets as dict containing dicts
         :param spreadsheet_id: Google sheets url
         :param args: Name of sheets we want to convert to dict
         """
@@ -81,14 +83,18 @@ class GoogleSheetsClient:
 
         return sheets_dict
 
-    def get_all_sheets_as_dfs(self, spreadsheet_id: str, *args: str) -> pd.DataFrame:
+    def get_all_sheets_as_dfs(
+        self, spreadsheet_id: str, *args: str
+    ) -> Dict[str, pd.DataFrame]:
         """
-        Returns all wanted sheets as dict
+        Returns all wanted sheets as dict containing dataframes
         :param spreadsheet_id: Google sheets url
         :param args: Name of sheets we want to convert to dict
         """
-
-        data = self.get_all_sheets_as_dicts(spreadsheet_id, *args)
-        df = pd.DataFrame({key: pd.Series(value) for key, value in data.items()})
-
-        return df
+        sheet_names = list(args)
+        sheets_as_dfs = {}
+        for sheet_name in sheet_names:
+            sheets_as_dfs[sheet_name] = self.get_single_sheet_as_df(
+                spreadsheet_id, sheet_name,
+            )
+        return sheets_as_dfs
