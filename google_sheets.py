@@ -1,4 +1,4 @@
-from typing import List, Dict
+from typing import Dict
 
 from oauth2client.service_account import ServiceAccountCredentials
 from googleapiclient.discovery import build
