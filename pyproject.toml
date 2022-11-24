@@ -1,0 +1,30 @@
+[build-system]
+requires = ["setuptools>=63.2", "pandas>=1.5.2"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "eetc-utils"
+version = "0.1.0"
+authors = [
+  { name="East Empire Trading Company", email="eastempiretradingcompany2019@gmail.com" },
+  { name="Stefan Delic", email="einfach.jung1@gmail.com" },
+  { name="Milos Dovedan", email="dovedanmilosh@gmail.com" },
+]
+maintainers = [
+  { name="East Empire Trading Company", email="eastempiretradingcompany2019@gmail.com" },
+  { name="Stefan Delic", email="einfach.jung1@gmail.com" },
+  { name="Milos Dovedan", email="dovedanmilosh@gmail.com" },
+]
+description = "EETC Utils Library"
+readme = "README.md"
+license = { file="LICENSE" }
+requires-python = ">=3.8"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+
+[project.urls]
+"Homepage" = "https://github.com/east-empire-trading-company/eetc-utils"
+"Bug Tracker" = "https://github.com/east-empire-trading-company/eetc-utils/issues"
