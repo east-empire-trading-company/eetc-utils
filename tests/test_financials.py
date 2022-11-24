@@ -1,6 +1,6 @@
 import unittest
 
-from financials import intrinsic_value_using_dcf
+from src.utils.finance import intrinsic_value_using_dcf
 
 
 class TestFinancials(unittest.TestCase):

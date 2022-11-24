@@ -1,6 +1,99 @@
+import math
+from datetime import datetime
 from typing import Optional
 
+import numpy as np
 import pandas as pd
+from arch import arch_model
+
+
+def garch_annualized_volatility(df: pd.DataFrame) -> float:
+    """
+    Calculate an annualized volatility forecast using the GARCH model.
+    """
+
+    closes = df["close"]
+    returns = 100 * closes.pct_change().dropna()
+
+    model = arch_model(returns)
+
+    res = model.fit()
+
+    # get the variance forecast
+    forecast = res.forecast(horizon=1, reindex=False)
+    variance_forecast = forecast.variance.iloc[-1][0]
+
+    # compute the annualized volatility forecast
+    volatility_forecast = np.sqrt(variance_forecast)
+    annualized_volatility_forecast = volatility_forecast * np.sqrt(252) / 100
+
+    return annualized_volatility_forecast
+
+
+def optimal_leverage_kelly_criterion(
+    price_data: pd.DataFrame,
+    position_start_date: str,
+    position_type: str = "LONG",
+    position_end_date: str = None,
+    use_fractional_kelly: bool = False,
+    use_garch: bool = False,
+) -> float:
+    """
+    Calculate optimal leverage for a position using the Kelly Criterion.
+    This is done by analysing the performance beginning with the start date,
+    calculating annualized volatility, returns and using (fractional) Kelly to
+    calculate the final value for optimal leverage. We also use GARCH to
+    forecast annualized volatility to improve the model further.
+
+    :param price_data: Price DataFrame
+    :param position_start_date: Date when the position was entered into,
+    format of "yyyy-mm-dd"
+    :param position_type: String that indicates the position type, can be either
+    "LONG" or "SHORT"
+    :param position_end_date: Date when the position was exited (optional),
+    format "yyyy-mm-dd"
+    :param use_fractional_kelly: Indicates whether to use fractional Kelly or no
+    :param use_garch: Indicates whether to use GARCH model for annualized
+    volatility or not
+    :return: Optimal leverage for the position
+    """
+
+    if not position_end_date:
+        position_end_date = datetime.now().strftime("%Y-%m-%d")
+
+    df = price_data[["date", "open", "high", "low", "close", "volume"]]
+    df = df.loc[position_start_date:position_end_date]
+    df = df.sort_values(by=["date"])
+
+    # calculate daily returns (current close in relation to the previous close)
+    if position_type == "SHORT":
+        df["return_perc"] = 1 - (df["close"] / df["close"].shift(-1))
+        df["return_perc"] = df["return_perc"].round(3)
+    else:
+        df["return_perc"] = (df["close"] / df["close"].shift(-1)) - 1
+        df["return_perc"] = df["return_perc"].round(3)
+
+    # calculate daily volatility
+    df["volatility_perc"] = (df["high"] - df["low"]) / df["open"]
+    df["volatility_perc"] = df["volatility_perc"].round(2)
+
+    # calculate annualized return
+    annualized_return = df["return_perc"].std() * math.sqrt(252)
+
+    # calculate annualized volatility
+    annualized_volatility = df["volatility_perc"].std() * math.sqrt(252)
+
+    if use_garch:
+        annualized_volatility = garch_annualized_volatility(df)
+
+    # calculate optimal leverage
+    optimal_leverage = annualized_return / (annualized_volatility**2)
+
+    # use fractional kelly
+    if use_fractional_kelly:
+        optimal_leverage *= 0.5
+
+    return optimal_leverage
 
 
 def compound_interest(amount: float, period: int, interest: float) -> float:
