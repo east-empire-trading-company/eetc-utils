@@ -114,7 +114,9 @@ def compound_interest(amount: float, period: int, interest: float) -> float:
 
 
 def performance_over_time(
-    price_data: pd.DataFrame, start_date: str, end_date: str,
+    price_data: pd.DataFrame,
+    start_date: str,
+    end_date: str,
 ) -> float:
     """
     Calculates performance of an asset over time using it's OHLC price data.
