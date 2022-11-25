@@ -1,0 +1,8 @@
+arch
+black
+numpy
+pandas
+pip-tools
+setuptools
+twine
+wheel
