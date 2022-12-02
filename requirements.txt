@@ -69,7 +69,7 @@ patsy==0.5.3
     # via statsmodels
 pep517==0.13.0
     # via build
-pip-tools==6.10.0
+pip-tools==6.11.0
     # via -r requirements.in
 pkginfo==1.8.3
     # via twine
@@ -114,11 +114,6 @@ six==1.16.0
     #   python-dateutil
 statsmodels==0.13.5
     # via arch
-tomli==2.0.1
-    # via
-    #   black
-    #   build
-    #   pep517
 twine==4.0.1
     # via -r requirements.in
 urllib3==1.26.13
