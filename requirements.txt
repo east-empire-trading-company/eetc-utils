@@ -46,7 +46,7 @@ more-itertools==9.0.0
     # via jaraco-classes
 mypy-extensions==0.4.3
     # via black
-numpy==1.23.5
+numpy==1.24.0
     # via
     #   -r requirements.in
     #   arch
@@ -114,11 +114,6 @@ six==1.16.0
     #   python-dateutil
 statsmodels==0.13.5
     # via arch
-tomli==2.0.1
-    # via
-    #   black
-    #   build
-    #   pep517
 twine==4.0.1
     # via -r requirements.in
 urllib3==1.26.13
