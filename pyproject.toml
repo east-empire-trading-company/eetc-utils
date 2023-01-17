@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "eetc-utils"
-version = "1.0.1"
+version = "1.0.2"
 authors = [
   { name="East Empire Trading Company", email="eastempiretradingcompany2019@gmail.com" },
   { name="Stefan Delic", email="einfach.jung1@gmail.com" },
