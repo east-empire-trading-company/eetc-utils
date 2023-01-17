@@ -62,7 +62,8 @@ def optimal_leverage_kelly_criterion(
         position_end_date = datetime.now().strftime("%Y-%m-%d")
 
     df = price_data[["date", "open", "high", "low", "close", "volume"]]
-    df = df.loc[position_start_date:position_end_date]
+    mask = (df["date"] > position_start_date) & (df["date"] <= position_end_date)
+    df = df.loc[mask]
     df = df.sort_values(by=["date"])
 
     # calculate daily returns (current close in relation to the previous close)
