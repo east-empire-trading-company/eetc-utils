@@ -58,7 +58,7 @@ packaging==21.3
     # via
     #   build
     #   statsmodels
-pandas==1.5.2
+pandas==1.5.3
     # via
     #   -r requirements.in
     #   arch
@@ -114,11 +114,6 @@ six==1.16.0
     #   python-dateutil
 statsmodels==0.13.5
     # via arch
-tomli==2.0.1
-    # via
-    #   black
-    #   build
-    #   pep517
 twine==4.0.1
     # via -r requirements.in
 urllib3==1.26.13
