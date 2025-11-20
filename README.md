@@ -213,6 +213,35 @@ python -m pytest tests/ --cov=src/eetc_utils
 
 ### Publishing to PyPI
 
+#### Prerequisites
+
+Create a `.pypirc` file in the project root with your PyPI API tokens:
+
+```ini
+[distutils]
+index-servers =
+  pypi
+  testpypi
+
+[testpypi]
+repository = https://test.pypi.org/legacy/
+username = __token__
+password = pypi-YOUR_TEST_PYPI_TOKEN_HERE
+
+[pypi]
+repository = https://upload.pypi.org/legacy/
+username = __token__
+password = pypi-YOUR_PRODUCTION_PYPI_TOKEN_HERE
+```
+
+**Note**: The `.pypirc` file is already in `.gitignore` and will not be committed to version control.
+
+To generate API tokens:
+- **TestPyPI**: https://test.pypi.org/manage/account/token/
+- **Production PyPI**: https://pypi.org/manage/account/token/
+
+#### Publishing Steps
+
 1. Update version in `pyproject.toml`:
    - Increment `version` field in `[tool.poetry]` section
    - Update dependencies in `[tool.poetry.dependencies]` if needed
@@ -231,6 +260,8 @@ python -m pytest tests/ --cov=src/eetc_utils
    ```bash
    make publish_package_on_pypi
    ```
+
+The Makefile commands automatically read credentials from `.pypirc` and configure Poetry before publishing.
 
 ## Configuration
 
