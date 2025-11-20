@@ -224,3 +224,27 @@ def intrinsic_value_using_dcf(
     intrinsic_value_per_share = present_value_of_cash_flow_total / shares
 
     return intrinsic_value_per_share
+
+
+def convert_daily_ohlc_data_to_weekly(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Convert daily OHLC data to weekly.
+    :param df: Daily OHLC price data.
+    :return: Weekly OHLC price data.
+    """
+
+    df["date"] = pd.to_datetime(df["date"], yearfirst=True, infer_datetime_format=True)
+    df = df.set_index("date")
+    logic = {
+        "open": "first",
+        "high": "max",
+        "low": "min",
+        "close": "last",
+        "volume": "sum",
+    }
+    df = df.resample("W").apply(logic)
+    # set the index to the beginning of the week
+    df.index = df.index - pd.tseries.frequencies.to_offset("6D")
+    df = df.sort_values(by=["date"])
+
+    return df
