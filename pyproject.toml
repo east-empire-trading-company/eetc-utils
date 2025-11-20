@@ -1,30 +1,46 @@
 [build-system]
-requires = ["setuptools>=63.2", "pandas>=1.5.2"]
-build-backend = "setuptools.build_meta"
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
 
-[project]
+[tool.poetry]
 name = "eetc-utils"
 version = "1.0.2"
+description = "EETC Utils Library"
 authors = [
-  { name="East Empire Trading Company", email="eastempiretradingcompany2019@gmail.com" },
-  { name="Stefan Delic", email="einfach.jung1@gmail.com" },
-  { name="Milos Dovedan", email="dovedanmilosh@gmail.com" },
+    "East Empire Trading Company <eastempiretradingcompany2019@gmail.com>",
+    "Stefan Delic <einfach.jung1@gmail.com>",
+    "Milos Dovedan <dovedanmilosh@gmail.com>"
 ]
 maintainers = [
-  { name="East Empire Trading Company", email="eastempiretradingcompany2019@gmail.com" },
-  { name="Stefan Delic", email="einfach.jung1@gmail.com" },
-  { name="Milos Dovedan", email="dovedanmilosh@gmail.com" },
+    "East Empire Trading Company <eastempiretradingcompany2019@gmail.com>",
+    "Stefan Delic <einfach.jung1@gmail.com>",
+    "Milos Dovedan <dovedanmilosh@gmail.com>"
 ]
-description = "EETC Utils Library"
 readme = "README.md"
-license = { file="LICENSE" }
-requires-python = ">=3.8"
+license = "MIT"
+homepage = "https://github.com/east-empire-trading-company/eetc-utils"
+repository = "https://github.com/east-empire-trading-company/eetc-utils"
 classifiers = [
     "Programming Language :: Python :: 3",
     "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
 ]
+packages = [{include = "eetc_utils", from = "src"}]
 
-[project.urls]
-"Homepage" = "https://github.com/east-empire-trading-company/eetc-utils"
+[tool.poetry.dependencies]
+python = ">=3.12,<4.0"
+pandas = "^2.3.3"
+numpy = "^2.3.4"
+arch = "^8.0.0"
+requests = "^2.28.0"
+pytest = "^9.0.1"
+setuptools = "^80.9.0"
+wheel = "^0.45.1"
+
+[tool.poetry.group.dev.dependencies]
+black = "^25.9.0"
+twine = "^6.2.0"
+build = "^1.0.0"
+
+[tool.poetry.urls]
 "Bug Tracker" = "https://github.com/east-empire-trading-company/eetc-utils/issues"
