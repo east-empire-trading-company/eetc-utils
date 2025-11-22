@@ -1,3 +1,4 @@
+import numpy as np
 import pytest
 import pandas as pd
 from unittest.mock import patch, Mock
@@ -7,7 +8,7 @@ from src.eetc_utils.finance import (
     beta_to_discount_rate,
     intrinsic_value_using_dcf,
     convert_daily_ohlc_data_to_weekly,
-    optimal_leverage_kelly_criterion,
+    calculate_optimal_leverage_kelly,
     garch_annualized_volatility,
     performance_over_time,
 )
@@ -117,50 +118,6 @@ def test_convert_daily_ohlc_data_to_weekly(sample_daily_ohlc_for_weekly_conversi
 
 
 # ai-generated
-def test_optimal_leverage_kelly_criterion_long_position(sample_ohlc_dataframe):
-    # given
-    price_data = sample_ohlc_dataframe.copy()
-    position_start_date = "2024-01-01"
-    position_end_date = "2024-01-20"
-
-    # when
-    result = optimal_leverage_kelly_criterion(
-        price_data,
-        position_start_date,
-        position_type="LONG",
-        position_end_date=position_end_date,
-    )
-
-    # then
-    assert isinstance(result, float)
-    assert result >= 0
-
-
-# ai-generated
-def test_optimal_leverage_kelly_criterion_with_fractional_kelly(sample_ohlc_dataframe):
-    # given
-    price_data = sample_ohlc_dataframe.copy()
-    position_start_date = "2024-01-01"
-    position_end_date = "2024-01-20"
-
-    # when
-    result_full = optimal_leverage_kelly_criterion(
-        price_data, position_start_date, position_end_date=position_end_date
-    )
-    result_fractional = optimal_leverage_kelly_criterion(
-        price_data,
-        position_start_date,
-        position_end_date=position_end_date,
-        use_fractional_kelly=True,
-    )
-
-    # then
-    assert isinstance(result_full, float)
-    assert isinstance(result_fractional, float)
-    assert result_fractional == pytest.approx(result_full * 0.5, rel=0.01)
-
-
-# ai-generated
 @patch("src.eetc_utils.finance.arch_model")
 def test_garch_annualized_volatility_returns_positive_float(mock_arch_model):
     # given
@@ -192,7 +149,7 @@ def test_garch_annualized_volatility_returns_positive_float(mock_arch_model):
 def test_performance_over_time_calculates_percentage_change():
     # given
     data = {
-        "Close": [100, 105, 110, 108, 112, 115, 118, 120, 125, 130],
+        "close": [100, 105, 110, 108, 112, 115, 118, 120, 125, 130],
     }
     df = pd.DataFrame(
         data, index=pd.date_range(start="2024-01-01", periods=10, freq="D")
@@ -207,3 +164,50 @@ def test_performance_over_time_calculates_percentage_change():
     assert isinstance(result, float)
     assert result == 30.0
     assert result == pytest.approx((130 / 100) * 100 - 100, rel=0.01)
+
+
+# ai-generated
+def test_calculate_optimal_leverage_kelly_returns_correct_value():
+    # given
+    df = pd.DataFrame(
+        {
+            "date": pd.date_range(start="2020-01-01", periods=100, freq="D"),
+            "close": [100.0 * (1.01 ** i) for i in range(100)],
+        }
+    )
+    position_type = "LONG"
+    regime_start_date = "2020-01-01"
+    fractional_kelly_multiplier = 0.5
+    use_garch = False
+
+    # calculate expected result manually (matching function logic exactly)
+    regime_start = pd.to_datetime(regime_start_date)
+    last_date = df["date"].max()
+    mask = (df["date"] >= regime_start) & (df["date"] < last_date)
+    filtered_df = df.loc[mask].copy()
+
+    filtered_df["log_return"] = np.log(
+        filtered_df["close"] / filtered_df["close"].shift(1)
+    )
+    filtered_df = filtered_df.dropna()
+
+    daily_mean_return = filtered_df["log_return"].mean()
+    annualized_return = daily_mean_return * 252
+    daily_variance = filtered_df["log_return"].var()
+    annualized_variance = daily_variance * 252
+    expected_kelly = annualized_return / annualized_variance
+    expected_result = expected_kelly * fractional_kelly_multiplier
+
+    # when
+    result = calculate_optimal_leverage_kelly(
+        df=df,
+        position_type=position_type,
+        regime_start_date=regime_start_date,
+        fractional_kelly_multiplier=fractional_kelly_multiplier,
+        use_garch=use_garch,
+    )
+
+    # then
+    assert isinstance(result, float)
+    assert result > 0
+    assert result == pytest.approx(expected_result, rel=0.001)
