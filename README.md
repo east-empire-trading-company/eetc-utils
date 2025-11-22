@@ -9,9 +9,15 @@ A Python library providing reusable utilities for financial analysis and algorit
 ## Features
 
 ### Finance Utilities
-- **Quantitative Finance Functions**: Kelly Criterion, DCF valuation, volatility forecasting
-- **GARCH Models**: Advanced volatility analysis using ARCH library integration
-- **OHLC Data Manipulation**: Tools for working with time-series price data
+- **Quantitative Finance Functions**: Kelly Criterion position sizing, DCF valuation, compound interest
+- **GARCH Models**: Advanced volatility forecasting using ARCH library integration
+- **OHLC Data Manipulation**: Convert daily data to weekly timeframes, performance calculations
+
+### Options Trading
+- **Black-Scholes Pricing**: Calculate option prices for calls and puts
+- **Greeks Calculations**: Gamma exposure (GEX) and other option Greeks
+- **Volatility Analysis**: Convert option IV to underlying IV, standard distribution functions
+- **Strike Range Tools**: Find strike prices within percentage ranges
 
 ### API Clients
 - **EETC Data Hub Client**: Fetch price data, fundamentals, macroeconomic indicators, and order history
@@ -33,34 +39,85 @@ pip install eetc-utils
 ### Finance Utilities
 
 ```python
-from src.eetc_utils.finance import (
-    optimal_leverage_kelly_criterion,
-    dcf_valuation,
-    forecast_volatility_garch
+from eetc_utils.finance import (
+    calculate_optimal_leverage_kelly,
+    intrinsic_value_using_dcf,
+    garch_annualized_volatility,
+    convert_daily_ohlc_data_to_weekly
 )
+import pandas as pd
 
 # Calculate optimal leverage using Kelly Criterion
-leverage = optimal_leverage_kelly_criterion(
-    win_rate=0.55,
-    avg_win=0.02,
-    avg_loss=0.01
+price_df = pd.DataFrame({
+    'date': pd.date_range('2020-01-01', periods=200),
+    'close': [100 + i * 0.5 for i in range(200)]
+})
+
+leverage = calculate_optimal_leverage_kelly(
+    df=price_df,
+    position_type="LONG",
+    regime_start_date="2020-01-01",
+    fractional_kelly_multiplier=0.5,
+    use_garch=False
 )
 
 # DCF valuation
-intrinsic_value = dcf_valuation(
-    free_cash_flows=[100, 110, 121],
-    discount_rate=0.10,
-    terminal_growth_rate=0.03
+intrinsic_value = intrinsic_value_using_dcf(
+    cash_flow=1000000000,
+    growth_years=10,
+    shares=100000000,
+    growth_rate=1.15,
+    beta=1.2
 )
 
 # Forecast volatility using GARCH
-volatility = forecast_volatility_garch(returns_series, horizon=5)
+volatility = garch_annualized_volatility(price_df)
+
+# Convert daily OHLC to weekly
+weekly_df = convert_daily_ohlc_data_to_weekly(price_df)
+```
+
+### Options Trading
+
+```python
+from eetc_utils.options import (
+    calculate_option_price_black_scholes,
+    find_strikes_in_range,
+    GEX,
+    calculate_underlying_iv_from_option_iv
+)
+
+# Calculate Black-Scholes option price
+call_price = calculate_option_price_black_scholes(
+    right="C",
+    und_price=100.0,
+    strike=105.0,
+    rate=0.05,
+    tte=0.5,
+    implied_vol=0.25,
+    pv_dividend=0.0
+)
+
+# Find strike prices within a range
+strikes = find_strikes_in_range(
+    range_length_perc=0.1,
+    price=100.0
+)
+
+# Calculate Gamma Exposure
+gex = GEX(oi=1000, gamma=0.05)
+
+# Convert option IV to underlying IV
+underlying_iv = calculate_underlying_iv_from_option_iv(
+    option_implied_vol=0.20,
+    t=30/365
+)
 ```
 
 ### EETC Data Hub Client
 
 ```python
-from src.eetc_utils.clients.eetc_data import EETCDataClient
+from eetc_utils.clients.eetc_data import EETCDataClient
 import os
 
 # Initialize client (requires EETC_API_KEY environment variable)
@@ -79,7 +136,7 @@ macro_data = client.get_macro_indicators(indicator="GDP", country="US")
 ### EETC Notifications Manager Client
 
 ```python
-from src.eetc_utils.clients.eetc_notifications import EETCNotificationsClient
+from eetc_utils.clients.eetc_notifications import EETCNotificationsClient
 import os
 
 # Initialize client (requires EETC_API_KEY environment variable)
@@ -93,8 +150,8 @@ client.send_trade_update_to_telegram(msg="Shorted TSLA x100 at 1312.69.")
 ### Backtesting Framework
 
 ```python
-from src.eetc_utils.strategy.backtesting.strategy import Strategy
-from src.eetc_utils.strategy.backtesting.engine import BacktestEngine
+from eetc_utils.strategy.backtesting.strategy import Strategy
+from eetc_utils.strategy.backtesting.engine import BacktestEngine
 import pandas as pd
 
 class MyStrategy(Strategy):
@@ -144,6 +201,7 @@ print(f"Max Drawdown: {results['max_drawdown']:.2%}")
 ```
 src/eetc_utils/
 ├── finance.py              # Quantitative finance utilities
+├── options.py              # Options pricing and Greeks
 ├── clients/
 │   ├── eetc_data.py       # EETC Data Hub API client
 │   └── eetc_notifications.py  # Notifications client
@@ -157,17 +215,35 @@ src/eetc_utils/
         └── metrics.py     # Performance metrics
 ```
 
-### Key Classes
+### Key Functions & Classes
 
 #### Finance Module (`finance.py`)
-- `optimal_leverage_kelly_criterion()`: Calculate optimal position sizing
-- `dcf_valuation()`: Discounted cash flow valuation
-- `forecast_volatility_garch()`: GARCH-based volatility forecasting
-- Various OHLC data manipulation utilities
+- `calculate_optimal_leverage_kelly()`: Calculate optimal leverage using Kelly Criterion
+- `calculate_position_size_kelly()`: Calculate position size based on Kelly Criterion
+- `intrinsic_value_using_dcf()`: Discounted cash flow valuation
+- `garch_annualized_volatility()`: GARCH-based volatility forecasting
+- `convert_daily_ohlc_data_to_weekly()`: Convert daily OHLC data to weekly timeframes
+- `performance_over_time()`: Calculate percentage performance between dates
+- `compound_interest()`: Calculate compound interest
+- `beta_to_discount_rate()`: Map beta to discount rate for DCF
+
+#### Options Module (`options.py`)
+- `calculate_option_price_black_scholes()`: Black-Scholes option pricing for calls and puts
+- `find_strikes_in_range()`: Find strike prices within a percentage range
+- `GEX()`: Calculate Gamma Exposure for option contracts
+- `calculate_underlying_iv_from_option_iv()`: Convert option IV to underlying IV
+- `PDF()`: Standard normal probability density function
+- `CND()`: Cumulative normal distribution
+- `D1()`, `D2()`: Black-Scholes d1 and d2 calculations
 
 #### API Clients
 - **EETCDataClient**: HTTP client for fetching market data and fundamentals
+  - `get_price_data()`: Fetch historical price data
+  - `get_fundamentals()`: Get company fundamentals
+  - `get_macro_indicators()`: Fetch macroeconomic indicators
+  - `get_order_history()`: Retrieve order history
 - **EETCNotificationsClient**: Send trading notifications via Telegram
+  - `send_trade_update_to_telegram()`: Send trade notifications
 
 #### Strategy Framework
 - **Live Trading**: `Strategy` (ABC) for implementing live strategies
