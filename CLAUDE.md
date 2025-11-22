@@ -114,7 +114,10 @@ def get_data(
 - Use **Sphinx-style** docstrings with `:param:`, `:return:`, and `:raises:` sections
 - **Maximum line length: 80 characters** (wrap long lines)
 - **Always add a blank line after the closing `"""`** of every docstring
-- Include **examples** for complex methods or those with multiple parameters
+- **Examples in docstrings:**
+  - **Classes**: Include examples showing initialization and basic usage
+  - **Methods/Functions**: Do NOT include examples - the signature and description should be sufficient
+  - This keeps function documentation concise while providing helpful class usage patterns
 - Clearly document when return type depends on parameters (e.g., `as_json` flag)
 
 **Class docstring template:**
@@ -161,9 +164,6 @@ def method_name(
     :return: Detailed description. If return type is conditional,
         document both possible return types clearly.
     :raises requests.HTTPError: If the API request fails.
-
-    Example:
-        >>> client.method_name("AAPL", param2=100)
     """
 
     # Implementation starts here
@@ -232,6 +232,65 @@ from requests import Response
 - Use double quotes for strings
 - Leave blank line before return statements in functions
 - Leave blank line after docstrings in functions
+
+### Comments
+
+- **Comments should start with lowercase letters**
+- **Exception**: Keep proper names, acronyms, and technical terms in their standard case
+- **Only add comments when the code is not self-explanatory**
+  - Add comments for complex logic, non-obvious calculations, or important context
+  - Don't comment obvious code where the intent is clear from variable/function names
+- This applies to inline comments, block comments, and TODO comments
+
+**When to add comments:**
+
+✅ **Good use of comments** (explaining non-obvious logic):
+```python
+# Kelly Criterion: f* = μ / σ²
+optimal_leverage = annualized_return / annualized_variance
+
+# GARCH needs more data (typically 100+ observations)
+min_observations = 100 if use_garch else 30
+
+# set the index to the beginning of the week (Monday)
+df.index = df.index - pd.tseries.frequencies.to_offset("6D")
+
+# for SHORT positions, invert the returns
+if position_type == "SHORT":
+    df["log_return"] = -df["log_return"]
+```
+
+❌ **Unnecessary comments** (stating the obvious):
+```python
+# assign symbol to a variable
+symbol = "AAPL"
+
+# check if df is empty
+if df.empty:
+    raise ValueError("df cannot be empty.")
+
+# convert date column to datetime
+df["date"] = pd.to_datetime(df["date"])
+
+# return the result
+return result
+```
+
+**Comment formatting:**
+
+✅ **Correct formatting:**
+```python
+# calculate daily log returns
+df["log_return"] = np.log(df["close"] / df["close"].shift(1))
+
+# TODO: add support for intraday data
+```
+
+❌ **Incorrect formatting:**
+```python
+# Calculate daily log returns  (starts with uppercase)
+# The user specified this parameter  (starts with uppercase)
+```
 
 ### Return Values
 
@@ -338,7 +397,7 @@ Python version: 3.12+
 
 ## Important Notes
 
-- Import paths use `src.eetc_utils` prefix (e.g., `from src.eetc_utils.finance import optimal_leverage_kelly_criterion`)
+- Import paths use `src.eetc_utils` prefix (e.g., `from src.eetc_utils.finance import calculate_optimal_leverage_kelly`)
 - Test file uses outdated import `from src.utils.finance` - this should be `from src.eetc_utils.finance`
 - API key for EETC Data Hub can be set via `EETC_API_KEY` environment variable
 - Backtest results are saved to `results/` directory with naming pattern: `{strategy_name}__{symbol}__[trades.json|equity.csv|perf.json]`
