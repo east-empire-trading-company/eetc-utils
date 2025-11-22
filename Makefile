@@ -4,8 +4,6 @@ install_python_requirements:
 update_python_requirements:
 	poetry update
 
-update_and_install_python_requirements: update_python_requirements
-
 reformat_code:
 	black .
 
