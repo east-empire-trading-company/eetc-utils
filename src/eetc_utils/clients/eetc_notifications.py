@@ -36,24 +36,13 @@ class EETCNotificationsClient:
         :return: Response data from the API as a dictionary, typically
             containing status information about the message delivery.
         :raises requests.HTTPError: If the API request fails.
-
-        Example:
-            >>> client = EETCNotificationsClient(api_key="your-api-key")
-            >>> response = client.send_trade_update_to_telegram(
-            ...     "Trade executed: BUY 100 AAPL @ $150.25"
-            ... )
-            >>> print(response)
         """
 
-        payload = {
-            "message": msg,
-        }
         response = requests.post(
             f"{self.base_url}/api/v1/telegram/send_trade_update",
-            json=payload,
+            json={"message": msg},
             headers={"X-API-Key": self.api_key},
         )
-
         if response.status_code not in [200, 201]:
             response.raise_for_status()
 
