@@ -469,3 +469,134 @@ def test_save_orders_error(mock_post, data_client):
     # when / then
     with pytest.raises(HTTPError):
         data_client.save_orders(orders)
+
+
+# ai-generated
+@patch.object(EETCDataClient, "_send_http_request")
+def test_get_roguetrader_signals_as_dataframe(
+    mock_send, data_client, mock_roguetrader_signals_data
+):
+    # given
+    mock_response = Mock()
+    mock_response.json.return_value = mock_roguetrader_signals_data
+    mock_send.return_value = mock_response
+
+    # when
+    result = data_client.get_roguetrader_signals()
+
+    # then
+    assert isinstance(result, pd.DataFrame)
+    assert len(result) == 1
+    assert "date" in result.columns
+    assert "symbol" in result.columns
+    assert "previous_close" in result.columns
+    assert result["date"].iloc[0] == "2024-01-15"
+    assert result["symbol"].iloc[0] == "SPY"
+    assert result["previous_close"].iloc[0] == 450.25
+
+
+# ai-generated
+@patch.object(EETCDataClient, "_send_http_request")
+def test_get_roguetrader_signals_as_json(
+    mock_send, data_client, mock_roguetrader_signals_data
+):
+    # given
+    mock_response = Mock()
+    mock_response.json.return_value = mock_roguetrader_signals_data
+    mock_send.return_value = mock_response
+
+    # when
+    result = data_client.get_roguetrader_signals(as_json=True)
+
+    # then
+    assert isinstance(result, list)
+    assert len(result) == 1
+    assert result[0]["date"] == "2024-01-15"
+    assert result[0]["symbol"] == "SPY"
+    assert result[0]["previous_close"] == 450.25
+    assert result[0]["open_price"] == 451.00
+    assert result[0]["atm_strike"] == 450
+    assert result[0]["gex_regime"] == "positive"
+
+
+# ai-generated
+@patch.object(EETCDataClient, "_send_http_request")
+def test_get_roguetrader_signals_with_all_filters(mock_send, data_client):
+    # given
+    mock_response = Mock()
+    mock_response.json.return_value = []
+    mock_send.return_value = mock_response
+    expected_params = {
+        "date": "2024-01-15",
+        "symbol": "SPY",
+    }
+
+    # when
+    data_client.get_roguetrader_signals(
+        date="2024-01-15",
+        symbol="SPY",
+    )
+
+    # then
+    call_args = mock_send.call_args
+    assert call_args[0][1] == expected_params
+
+
+# ai-generated
+@patch("src.eetc_utils.clients.eetc_data.requests.post")
+def test_save_roguetrader_signals_success(mock_post, data_client):
+    # given
+    mock_response = Mock()
+    mock_response.status_code = 201
+    mock_post.return_value = mock_response
+    signals = [
+        {
+            "date": "2024-01-15",
+            "symbol": "SPY",
+            "previous_close": 450.25,
+            "open_price": 451.00,
+            "open_gap": 0.17,
+            "atm_strike": 450,
+            "atm_iv": 0.15,
+            "implied_daily_move_pct": 1.2,
+            "atm_greeks": {"delta": 0.5, "gamma": 0.02},
+            "vix_previous_close": 14.5,
+            "vix_at_calculation": 15.2,
+            "vix_change_pct": 4.83,
+            "signals": [{"signal": 13.12}],
+            "aggregate_gex": 1250000.0,
+            "zero_gamma_level": 448.5,
+            "gex_regime": "positive",
+            "trading_allowed": True,
+            "halt_reason": None,
+        }
+    ]
+
+    # when
+    result = data_client.save_roguetrader_signals(signals)
+
+    # then
+    assert result is None
+    mock_post.assert_called_once_with(
+        f"{data_client.base_url}/roguetrader-signals/",
+        json=signals,
+        headers={
+            "Content-Type": "application/json",
+            "EETC-API-Key": data_client.api_key,
+        },
+    )
+
+
+# ai-generated
+@patch("src.eetc_utils.clients.eetc_data.requests.post")
+def test_save_roguetrader_signals_error(mock_post, data_client):
+    # given
+    mock_response = Mock()
+    mock_response.status_code = 400
+    mock_response.raise_for_status.side_effect = HTTPError("400 Client Error")
+    mock_post.return_value = mock_response
+    signals = [{"date": "2024-01-15"}]
+
+    # when / then
+    with pytest.raises(HTTPError):
+        data_client.save_roguetrader_signals(signals)

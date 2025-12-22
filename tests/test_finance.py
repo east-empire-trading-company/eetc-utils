@@ -172,7 +172,7 @@ def test_calculate_optimal_leverage_kelly_returns_correct_value():
     df = pd.DataFrame(
         {
             "date": pd.date_range(start="2020-01-01", periods=100, freq="D"),
-            "close": [100.0 * (1.01 ** i) for i in range(100)],
+            "close": [100.0 * (1.01**i) for i in range(100)],
         }
     )
     position_type = "LONG"

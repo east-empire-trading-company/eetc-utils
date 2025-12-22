@@ -374,3 +374,104 @@ class EETCDataClient:
 
         if response.status_code not in [200, 201]:
             response.raise_for_status()
+
+    def get_roguetrader_signals(
+        self,
+        date: Optional[str] = None,
+        symbol: Optional[str] = None,
+        as_json: bool = False,
+    ) -> Union[pd.DataFrame, List[Dict]]:
+        """
+        Retrieve RogueTrader signals from the EETC Data Hub via the
+        `/roguetrader-signals` API.
+
+        This endpoint returns eetc-roguetrader generated signals data
+        with optional filtering. Filters can be combined to narrow
+        down results (e.g., by date and symbol).
+
+        :param date: Signal generation date in format "yyyy-mm-dd".
+        :param symbol: Ticker symbol of the instrument (e.g., "AAPL").
+        :param as_json: If True, returns raw JSON list; if False
+            (default), returns pandas DataFrame.
+        :return: RogueTrader signals data as pandas DataFrame (default)
+            or list of dicts (if as_json=True).
+        :raises requests.HTTPError: If the API request fails.
+        """
+
+        url = f"{self.base_url}/roguetrader-signals/"
+        params = {
+            "date": date,
+            "symbol": symbol,
+        }
+        params = {k: v for k, v in params.items() if v is not None}
+
+        response = self._send_http_request(url, params)
+        data = response.json()
+
+        return data if as_json else pd.json_normalize(data)
+
+    def save_roguetrader_signals(self, signals: List[Dict[str, Any]]) -> None:
+        """
+        Save one or multiple eetc-roguetrader signals to the EETC Data
+        Hub.
+
+        :param signals: List of signal dictionaries. Each signal should
+            contain:
+            - date (str): Signal generation date (e.g., "2024-01-15")
+            - symbol (str): Ticker symbol (e.g., "SPY")
+            - previous_close (float): Previous day's closing price
+            - open_price (float): Opening price
+            - open_gap (float): Gap percentage
+            - atm_strike (int): At-the-money strike price
+            - atm_iv (float): At-the-money implied volatility
+            - implied_daily_move_pct (float): Expected daily move %
+            - atm_greeks (dict): ATM option Greeks
+            - vix_previous_close (float): Previous VIX close
+            - vix_at_calculation (float): VIX at calculation time
+            - vix_change_pct (float): VIX change percentage
+            - signals (list): List of signal values
+            - aggregate_gex (float): Aggregate gamma exposure
+            - zero_gamma_level (float): Zero gamma price level
+            - gex_regime (str): GEX regime ("positive" or "negative")
+            - trading_allowed (bool): Whether trading is allowed
+            - halt_reason (str, optional): Reason for trading halt
+
+        Example:
+            >>> client.save_roguetrader_signals([{
+            ...     "date": "2024-01-15",
+            ...     "symbol": "SPY",
+            ...     "previous_close": 450.25,
+            ...     "open_price": 451.00,
+            ...     "open_gap": 0.17,
+            ...     "atm_strike": 450,
+            ...     "atm_iv": 0.15,
+            ...     "implied_daily_move_pct": 1.2,
+            ...     "atm_greeks": {"delta": 0.5, "gamma": 0.02},
+            ...     "vix_previous_close": 14.5,
+            ...     "vix_at_calculation": 15.2,
+            ...     "vix_change_pct": 4.83,
+            ...     "signals": [{"signal": 13.12}],
+            ...     "aggregate_gex": 1250000.0,
+            ...     "zero_gamma_level": 448.5,
+            ...     "gex_regime": "positive",
+            ...     "trading_allowed": True,
+            ...     "halt_reason": None
+            ... }])
+
+        :raises requests.HTTPError: If the API request fails
+            (non-200/201 status).
+        """
+
+        url = f"{self.base_url}/roguetrader-signals/"
+
+        response = requests.post(
+            url,
+            json=signals,
+            headers={
+                "Content-Type": "application/json",
+                "EETC-API-Key": self.api_key,
+            },
+        )
+
+        if response.status_code not in [200, 201]:
+            response.raise_for_status()

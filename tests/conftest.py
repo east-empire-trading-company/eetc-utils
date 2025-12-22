@@ -180,6 +180,38 @@ def mock_orders_data():
 
 
 @pytest.fixture
+def mock_roguetrader_signals_data():
+    """
+    Fixture providing sample RogueTrader signals data response.
+
+    :return: List of dictionaries representing RogueTrader signals data.
+    """
+
+    return [
+        {
+            "date": "2024-01-15",
+            "symbol": "SPY",
+            "previous_close": 450.25,
+            "open_price": 451.00,
+            "open_gap": 0.17,
+            "atm_strike": 450,
+            "atm_iv": 0.15,
+            "implied_daily_move_pct": 1.2,
+            "atm_greeks": {"delta": 0.5, "gamma": 0.02},
+            "vix_previous_close": 14.5,
+            "vix_at_calculation": 15.2,
+            "vix_change_pct": 4.83,
+            "signals": [{"signal": 13.12}],
+            "aggregate_gex": 1250000.0,
+            "zero_gamma_level": 448.5,
+            "gex_regime": "positive",
+            "trading_allowed": True,
+            "halt_reason": None,
+        }
+    ]
+
+
+@pytest.fixture
 def sample_ohlc_dataframe():
     """
     Fixture providing sample OHLC DataFrame for finance calculations.

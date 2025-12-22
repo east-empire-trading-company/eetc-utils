@@ -114,7 +114,7 @@ def calculate_optimal_leverage_kelly(
     if use_garch:
         # use GARCH function to get annualized volatility
         annualized_volatility = garch_annualized_volatility(df)
-        annualized_variance = annualized_volatility ** 2
+        annualized_variance = annualized_volatility**2
     else:
         # simple historical variance
         daily_variance = df["log_return"].var()
