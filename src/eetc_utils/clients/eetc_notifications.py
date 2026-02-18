@@ -8,7 +8,7 @@ class EETCNotificationsClient:
     Client for interacting with the EETC Notifications Manager API.
 
     Provides methods to send notifications to various channels
-    including Telegram.
+    including Telegram and X (Twitter).
 
     :param api_key: API key for authenticating with EETC
         Notifications Manager.
@@ -16,6 +16,9 @@ class EETCNotificationsClient:
     Example:
         >>> client = EETCNotificationsClient(api_key="your-api-key")
         >>> response = client.send_trade_update_to_telegram(
+        ...     "Trade executed: BUY 100 AAPL @ $150"
+        ... )
+        >>> response = client.send_trade_update_to_x(
         ...     "Trade executed: BUY 100 AAPL @ $150"
         ... )
     """
@@ -40,6 +43,28 @@ class EETCNotificationsClient:
 
         response = requests.post(
             f"{self.base_url}/api/v1/telegram/send_trade_update",
+            json={"message": msg},
+            headers={"X-API-Key": self.api_key},
+        )
+        if response.status_code not in [200, 201]:
+            response.raise_for_status()
+
+        return response.json()
+
+    def send_trade_update_to_x(self, msg: str) -> Dict[str, Any]:
+        """
+        Send a trade update message to X (Twitter).
+
+        :param msg: The trade update message to send. Should contain
+            relevant trade information such as symbol, action, quantity,
+            and price.
+        :return: Response data from the API as a dictionary, typically
+            containing the posted message.
+        :raises requests.HTTPError: If the API request fails.
+        """
+
+        response = requests.post(
+            f"{self.base_url}/api/v1/x/send_trade_update",
             json={"message": msg},
             headers={"X-API-Key": self.api_key},
         )

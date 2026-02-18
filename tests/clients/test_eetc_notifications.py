@@ -57,3 +57,58 @@ def test_send_trade_update_error(mock_post, notifications_client):
     # when / then
     with pytest.raises(HTTPError):
         notifications_client.send_trade_update_to_telegram(message)
+
+
+# ai-generated
+@patch("src.eetc_utils.clients.eetc_notifications.requests.post")
+def test_send_trade_update_to_x_success(mock_post, notifications_client):
+    # given
+    mock_response = Mock()
+    mock_response.status_code = 200
+    mock_response.json.return_value = {
+        "message": "Trade executed: BUY 100 AAPL @ $150.25"
+    }
+    mock_post.return_value = mock_response
+    message = "Trade executed: BUY 100 AAPL @ $150.25"
+
+    # when
+    result = notifications_client.send_trade_update_to_x(message)
+
+    # then
+    assert result == {"message": "Trade executed: BUY 100 AAPL @ $150.25"}
+    assert result["message"] == message
+    mock_post.assert_called_once_with(
+        f"{notifications_client.base_url}/api/v1/x/send_trade_update",
+        json={"message": message},
+        headers={"X-API-Key": notifications_client.api_key},
+    )
+
+
+# ai-generated
+@patch("src.eetc_utils.clients.eetc_notifications.requests.post")
+def test_send_trade_update_to_x_error(mock_post, notifications_client):
+    # given
+    mock_response = Mock()
+    mock_response.status_code = 401
+    mock_response.raise_for_status.side_effect = HTTPError("401 Unauthorized")
+    mock_post.return_value = mock_response
+    message = "Trade executed: BUY 100 AAPL @ $150.25"
+
+    # when / then
+    with pytest.raises(HTTPError):
+        notifications_client.send_trade_update_to_x(message)
+
+
+# ai-generated
+@patch("src.eetc_utils.clients.eetc_notifications.requests.post")
+def test_send_trade_update_to_x_server_error(mock_post, notifications_client):
+    # given
+    mock_response = Mock()
+    mock_response.status_code = 500
+    mock_response.raise_for_status.side_effect = HTTPError("500 Internal Server Error")
+    mock_post.return_value = mock_response
+    message = "Trade executed: SELL 50 MSFT @ $400.00"
+
+    # when / then
+    with pytest.raises(HTTPError):
+        notifications_client.send_trade_update_to_x(message)
