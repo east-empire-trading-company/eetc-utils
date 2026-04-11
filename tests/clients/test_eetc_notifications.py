@@ -112,3 +112,52 @@ def test_send_trade_update_to_x_server_error(mock_post, notifications_client):
     # when / then
     with pytest.raises(HTTPError):
         notifications_client.send_trade_update_to_x(message)
+
+
+@patch("src.eetc_utils.clients.eetc_notifications.requests.post")
+def test_send_email_success(mock_post, notifications_client):
+    # given
+    mock_response = Mock()
+    mock_response.status_code = 200
+    payload = {"subject": "test", "body_html": "test", "recipients": ["test@gmail.com"]}
+    mock_response.json.return_value = payload
+    mock_post.return_value = mock_response
+
+    # when
+    result = notifications_client.send_email(**payload)
+
+    # then
+    assert result == payload
+    mock_post.assert_called_once_with(
+        f"{notifications_client.base_url}/api/v1/email/send_email",
+        json=payload,
+        headers={"X-API-Key": notifications_client.api_key},
+    )
+
+
+@patch("src.eetc_utils.clients.eetc_notifications.requests.post")
+def test_send_email_error(mock_post, notifications_client):
+    # given
+    mock_response = Mock()
+    mock_response.status_code = 401
+    mock_response.raise_for_status.side_effect = HTTPError("401 Unauthorized")
+    mock_post.return_value = mock_response
+    payload = {"subject": "test", "body_html": "test", "recipients": ["test@gmail.com"]}
+
+    # when / then
+    with pytest.raises(HTTPError):
+        notifications_client.send_email(**payload)
+
+
+@patch("src.eetc_utils.clients.eetc_notifications.requests.post")
+def test_send_email_server_error(mock_post, notifications_client):
+    # given
+    mock_response = Mock()
+    mock_response.status_code = 500
+    mock_response.raise_for_status.side_effect = HTTPError("500 Internal Server Error")
+    mock_post.return_value = mock_response
+    payload = {"subject": "test", "body_html": "test", "recipients": ["test@gmail.com"]}
+
+    # when / then
+    with pytest.raises(HTTPError):
+        notifications_client.send_email(**payload)

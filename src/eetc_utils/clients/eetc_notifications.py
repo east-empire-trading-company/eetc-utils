@@ -72,3 +72,16 @@ class EETCNotificationsClient:
             response.raise_for_status()
 
         return response.json()
+
+    def send_email(
+        self, subject: str, body_html: str, recipients: list[str]
+    ) -> Dict[str, Any]:
+        response = requests.post(
+            f"{self.base_url}/api/v1/email/send_email",
+            json={"subject": subject, "body_html": body_html, "recipients": recipients},
+            headers={"X-API-Key": self.api_key},
+        )
+        if response.status_code not in [200, 201]:
+            response.raise_for_status()
+
+        return response.json()
