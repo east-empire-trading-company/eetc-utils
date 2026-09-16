@@ -22,6 +22,7 @@ A Python library providing reusable utilities for financial analysis and algorit
 ### API Clients
 - **EETC Data Hub Client**: Fetch price data, fundamentals, macroeconomic indicators, and order history
 - **EETC Notifications Client**: Send trade updates and notifications to Telegram channels
+- **Claude Client**: Simple wrapper around the Anthropic SDK for single- and multi-turn text completions
 
 ### Strategy Framework
 - **Live Trading**: Abstract base classes for implementing live/paper trading strategies
@@ -146,6 +147,29 @@ client = EETCNotificationsClient(api_key=os.getenv("EETC_API_KEY"))
 client.send_trade_update_to_telegram(msg="Shorted TSLA x100 at 1312.69.")
 ```
 
+### Claude Client
+
+```python
+from eetc_utils.clients.claude import ClaudeClient
+import os
+
+# Initialize client (requires ANTHROPIC_API_KEY environment variable)
+client = ClaudeClient(api_key=os.getenv("ANTHROPIC_API_KEY"))
+
+# Send a single-turn prompt
+response = client.send_message("What is the capital of France?")
+
+# Send a multi-turn prompt with a system prompt and prior history
+response = client.send_message(
+    "What's my name?",
+    system="You are a helpful assistant.",
+    messages=[
+        {"role": "user", "content": "My name is Alice."},
+        {"role": "assistant", "content": "Nice to meet you, Alice."},
+    ],
+)
+```
+
 
 ### Backtesting Framework
 
@@ -204,7 +228,8 @@ src/eetc_utils/
 ├── options.py              # Options pricing and Greeks
 ├── clients/
 │   ├── eetc_data.py       # EETC Data Hub API client
-│   └── eetc_notifications.py  # Notifications client
+│   ├── eetc_notifications.py  # Notifications client
+│   └── claude.py          # Claude API client
 └── strategy/
     ├── strategy.py         # Live trading strategy base class
     ├── engine.py          # Live trading execution engine
@@ -244,6 +269,8 @@ src/eetc_utils/
   - `get_order_history()`: Retrieve order history
 - **EETCNotificationsClient**: Send trading notifications via Telegram
   - `send_trade_update_to_telegram()`: Send trade notifications
+- **ClaudeClient**: Simple wrapper around the Anthropic SDK
+  - `send_message()`: Send a single- or multi-turn text prompt to Claude
 
 #### Strategy Framework
 - **Live Trading**: `Strategy` (ABC) for implementing live strategies
@@ -344,6 +371,7 @@ The Makefile commands automatically read credentials from `.pypirc` and configur
 ### Environment Variables
 
 - `EETC_API_KEY`: API key for EETC Data Hub client (required for data access)
+- `ANTHROPIC_API_KEY`: API key for Claude client (required for Claude API access)
 
 ## Contributing
 

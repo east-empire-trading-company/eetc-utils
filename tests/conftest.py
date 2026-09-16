@@ -1,6 +1,7 @@
 import pytest
 import pandas as pd
 
+from src.eetc_utils.clients.claude import ClaudeClient
 from src.eetc_utils.clients.eetc_data import EETCDataClient
 from src.eetc_utils.clients.eetc_notifications import EETCNotificationsClient
 
@@ -38,6 +39,18 @@ def notifications_client(api_key):
     """
 
     return EETCNotificationsClient(api_key=api_key)
+
+
+@pytest.fixture
+def claude_client(api_key):
+    """
+    Fixture providing a ClaudeClient instance.
+
+    :param api_key: API key from the api_key fixture.
+    :return: ClaudeClient instance for testing.
+    """
+
+    return ClaudeClient(api_key=api_key)
 
 
 @pytest.fixture

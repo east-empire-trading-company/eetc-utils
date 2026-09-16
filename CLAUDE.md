@@ -59,6 +59,10 @@ The library is organized into four main areas:
    - **EETCNotificationsClient** (`eetc_notifications.py`): Client for EETC Notifications Manager
      - Sends trade updates and notifications to Telegram channels
      - Requires API key for authentication
+   - **ClaudeClient** (`claude.py`): Simple wrapper around the Anthropic SDK
+     - Sends single- and multi-turn text prompts to Claude
+     - Requires `ANTHROPIC_API_KEY` environment variable or explicit API key
+     - Exposes the underlying `anthropic.Anthropic` client for advanced use
 
 3. **Strategy Framework** (`src/eetc_utils/strategy/`)
    - **Live Trading**: `strategy.py` - Base `Strategy` class (ABC) for live trading strategies
