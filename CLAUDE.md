@@ -11,12 +11,12 @@ eetc-utils is a Python library providing reusable utilities for financial analys
 ### Environment Setup
 ```bash
 sudo apt-get install build-essential
-make update_and_install_python_requirements
+make install_python_requirements
 ```
 
 ### Code Formatting
 ```bash
-make reformat_code  # Uses black to format all Python code
+make reformat_code  # Runs `uv run black .` to format all Python code
 ```
 
 ### Testing
@@ -27,11 +27,11 @@ python -m pytest tests/test_financials.py  # Run single test file
 
 ### Package Publishing
 
-**Important**: Before publishing, update both dependencies in `[build_system]` and the `version` field in `[project]` section of `pyproject.toml`.
+**Important**: Before publishing, update the `version` field in the `[project]` section of `pyproject.toml`, and update `[project.dependencies]` / `[dependency-groups]` if dependencies changed. The `[build-system]` table (`uv_build`) should not normally need to change.
 
 ```bash
 # Build the package
-python -m build
+uv build
 
 # Test on PyPI Test
 make publish_package_on_pypi_test
@@ -390,7 +390,8 @@ mock_request.assert_any_call("/api/prices", params={"symbol": "GOOGL"})
 
 ## Dependencies
 
-The project uses Poetry for dependency management. Core dependencies:
+The project uses uv for dependency management, packaging, and
+publishing (`pyproject.toml` + `uv.lock`). Core dependencies:
 - `pandas`: Data manipulation
 - `numpy`: Numerical operations
 - `arch`: GARCH models for volatility forecasting
@@ -402,6 +403,5 @@ Python version: 3.12+
 ## Important Notes
 
 - Import paths use `src.eetc_utils` prefix (e.g., `from src.eetc_utils.finance import calculate_optimal_leverage_kelly`)
-- Test file uses outdated import `from src.utils.finance` - this should be `from src.eetc_utils.finance`
 - API key for EETC Data Hub can be set via `EETC_API_KEY` environment variable
 - Backtest results are saved to `results/` directory with naming pattern: `{strategy_name}__{symbol}__[trades.json|equity.csv|perf.json]`

@@ -1,21 +1,19 @@
 install_python_requirements:
-	poetry install
+	uv sync
 
 update_python_requirements:
-	poetry update
+	uv lock --upgrade
+	uv sync
 
 reformat_code:
-	black .
+	uv run black .
 
 publish_package_on_pypi_test:
 	rm -rf dist
-	poetry build
-	poetry config repositories.testpypi https://test.pypi.org/legacy/
-	@grep -A 2 "\[testpypi\]" .pypirc | grep "password" | awk '{print $$3}' | xargs -I {} poetry config pypi-token.testpypi {}
-	poetry publish --repository testpypi
+	uv build
+	UV_PUBLISH_TOKEN=$$(grep -A 3 "\[testpypi\]" .pypirc | grep "password" | awk '{print $$3}') uv publish --index testpypi
 
 publish_package_on_pypi:
 	rm -rf dist
-	poetry build
-	@grep -A 2 "\[pypi\]" .pypirc | grep "password" | awk '{print $$3}' | xargs -I {} poetry config pypi-token.pypi {}
-	poetry publish
+	uv build
+	UV_PUBLISH_TOKEN=$$(grep -A 3 "\[pypi\]" .pypirc | grep "password" | awk '{print $$3}') uv publish

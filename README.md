@@ -283,7 +283,7 @@ src/eetc_utils/
 
 ### Prerequisites
 - Python 3.12+
-- Poetry (for dependency management)
+- uv (for dependency management, packaging, and publishing)
 
 ### Setup
 
@@ -292,7 +292,7 @@ src/eetc_utils/
 sudo apt-get install build-essential
 
 # Install Python dependencies
-make update_and_install_python_requirements
+make install_python_requirements
 ```
 
 ### Code Formatting
@@ -346,12 +346,13 @@ To generate API tokens:
 #### Publishing Steps
 
 1. Update version in `pyproject.toml`:
-   - Increment `version` field in `[tool.poetry]` section
-   - Update dependencies in `[tool.poetry.dependencies]` if needed
+   - Increment `version` field in the `[project]` section
+   - Update dependencies in `[project.dependencies]` (or
+     `[dependency-groups]` for dev tools) if needed
 
 2. Build the package:
    ```bash
-   python -m build
+   uv build
    ```
 
 3. Test on PyPI Test:
@@ -364,7 +365,7 @@ To generate API tokens:
    make publish_package_on_pypi
    ```
 
-The Makefile commands automatically read credentials from `.pypirc` and configure Poetry before publishing.
+The Makefile commands automatically read credentials from `.pypirc` and pass them to `uv publish` via the `UV_PUBLISH_TOKEN` environment variable.
 
 ## Configuration
 
