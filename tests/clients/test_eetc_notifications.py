@@ -22,7 +22,7 @@ def test_client_initialization(api_key):
 
 # ai-generated
 @patch("src.eetc_utils.clients.eetc_notifications.requests.post")
-def test_send_trade_update_success(mock_post, notifications_client):
+def test_send_message_to_telegram_success(mock_post, notifications_client):
     # given
     mock_response = Mock()
     mock_response.status_code = 200
@@ -31,7 +31,7 @@ def test_send_trade_update_success(mock_post, notifications_client):
     message = "Trade executed: BUY 100 AAPL @ $150.25"
 
     # when
-    result = notifications_client.send_trade_update_to_telegram(message)
+    result = notifications_client.send_message_to_telegram(message)
 
     # then
     assert result == {"status": "success", "message_id": 123}
@@ -46,7 +46,7 @@ def test_send_trade_update_success(mock_post, notifications_client):
 
 # ai-generated
 @patch("src.eetc_utils.clients.eetc_notifications.requests.post")
-def test_send_trade_update_error(mock_post, notifications_client):
+def test_send_message_to_telegram_error(mock_post, notifications_client):
     # given
     mock_response = Mock()
     mock_response.status_code = 401
@@ -56,12 +56,12 @@ def test_send_trade_update_error(mock_post, notifications_client):
 
     # when / then
     with pytest.raises(HTTPError):
-        notifications_client.send_trade_update_to_telegram(message)
+        notifications_client.send_message_to_telegram(message)
 
 
 # ai-generated
 @patch("src.eetc_utils.clients.eetc_notifications.requests.post")
-def test_send_trade_update_to_x_success(mock_post, notifications_client):
+def test_send_post_on_x_success(mock_post, notifications_client):
     # given
     mock_response = Mock()
     mock_response.status_code = 200
@@ -72,7 +72,7 @@ def test_send_trade_update_to_x_success(mock_post, notifications_client):
     message = "Trade executed: BUY 100 AAPL @ $150.25"
 
     # when
-    result = notifications_client.send_trade_update_to_x(message)
+    result = notifications_client.send_post_on_x(message)
 
     # then
     assert result == {"message": "Trade executed: BUY 100 AAPL @ $150.25"}
@@ -86,7 +86,7 @@ def test_send_trade_update_to_x_success(mock_post, notifications_client):
 
 # ai-generated
 @patch("src.eetc_utils.clients.eetc_notifications.requests.post")
-def test_send_trade_update_to_x_error(mock_post, notifications_client):
+def test_send_post_on_x_error(mock_post, notifications_client):
     # given
     mock_response = Mock()
     mock_response.status_code = 401
@@ -96,12 +96,12 @@ def test_send_trade_update_to_x_error(mock_post, notifications_client):
 
     # when / then
     with pytest.raises(HTTPError):
-        notifications_client.send_trade_update_to_x(message)
+        notifications_client.send_post_on_x(message)
 
 
 # ai-generated
 @patch("src.eetc_utils.clients.eetc_notifications.requests.post")
-def test_send_trade_update_to_x_server_error(mock_post, notifications_client):
+def test_send_post_on_x_server_error(mock_post, notifications_client):
     # given
     mock_response = Mock()
     mock_response.status_code = 500
@@ -111,7 +111,7 @@ def test_send_trade_update_to_x_server_error(mock_post, notifications_client):
 
     # when / then
     with pytest.raises(HTTPError):
-        notifications_client.send_trade_update_to_x(message)
+        notifications_client.send_post_on_x(message)
 
 
 @patch("src.eetc_utils.clients.eetc_notifications.requests.post")

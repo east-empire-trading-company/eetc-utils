@@ -15,10 +15,10 @@ class EETCNotificationsClient:
 
     Example:
         >>> client = EETCNotificationsClient(api_key="your-api-key")
-        >>> response = client.send_trade_update_to_telegram(
+        >>> response = client.send_message_to_telegram(
         ...     "Trade executed: BUY 100 AAPL @ $150"
         ... )
-        >>> response = client.send_trade_update_to_x(
+        >>> response = client.send_post_on_x(
         ...     "Trade executed: BUY 100 AAPL @ $150"
         ... )
     """
@@ -29,7 +29,7 @@ class EETCNotificationsClient:
             "https://eetc-notifications-manager-148296566920.us-east1.run.app"
         )
 
-    def send_trade_update_to_telegram(self, msg: str) -> Dict[str, Any]:
+    def send_message_to_telegram(self, msg: str) -> Dict[str, Any]:
         """
         Send a trade update message to the Telegram channel.
 
@@ -51,7 +51,7 @@ class EETCNotificationsClient:
 
         return response.json()
 
-    def send_trade_update_to_x(self, msg: str) -> Dict[str, Any]:
+    def send_post_on_x(self, msg: str) -> Dict[str, Any]:
         """
         Send a trade update message to X (Twitter).
 
