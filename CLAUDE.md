@@ -92,7 +92,7 @@ The backtesting strategy receives a `context` dict containing:
 Shared EETC conventions come from the `eetc` plugin — apply them:
 
 - Writing or editing Python code: `eetc:python-code-style`
-- After writing code, before running tests: `eetc:python-simplify`
+- After writing code, before running tests: run `/simplify` (built-in)
 - Writing or editing tests: `eetc:python-tests`
 - Commits and PRs: `eetc:git-conventions`
 
