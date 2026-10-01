@@ -510,3 +510,43 @@ class EETCDataClient:
 
         if response.status_code not in [200, 201]:
             response.raise_for_status()
+
+    def save_touch_events(self, events: List[Dict[str, Any]]) -> None:
+        """
+        Save one or multiple RogueTrader touch events to the EETC Data
+        Hub.
+
+        A touch event is one interaction of the underlying with a band
+        level, traded or not. The hub appends every event it is sent: an
+        event sent again with a higher version is a new row, and the
+        latest version per touch_id is the one to read.
+
+        :param events: List of touch event dictionaries. Each event must
+            contain:
+            - touch_id (str): Unique identifier of the touch
+            - version (int): Version of the row, starting at 1
+            - session_date (str): Session date, ISO format
+            - symbol (str): Ticker symbol (e.g., "SPY")
+            - signal (str): Signal name (e.g., "s1r")
+            - signal_level (float): Price of the band level
+            - event (str): "TOUCH", "NEAR_TOUCH" or "INVALIDATION"
+            - touched_at (str): Time of the touch, ISO format with offset
+            and may contain the outcome, the position_id, the market state
+            at the touch and the forward_path sampled after it.
+        :raises requests.HTTPError: If the API request fails
+            (non-200/201 status).
+        """
+
+        url = f"{self.base_url}/touch-events/"
+
+        response = requests.post(
+            url,
+            json=events,
+            headers={
+                "Content-Type": "application/json",
+                "EETC-API-Key": self.api_key,
+            },
+        )
+
+        if response.status_code not in [200, 201]:
+            response.raise_for_status()

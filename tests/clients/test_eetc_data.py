@@ -675,3 +675,91 @@ def test_save_realtime_bars_error(mock_post, data_client):
         },
     )
     mock_response.raise_for_status.assert_called_once_with()
+
+
+# ai-generated
+@patch("src.eetc_utils.clients.eetc_data.requests.post")
+def test_save_touch_events_success(mock_post, data_client):
+    # given a traded touch with one forward sample and a blocked one
+    mock_response = Mock()
+    mock_response.status_code = 201
+    mock_post.return_value = mock_response
+    events = [
+        {
+            "touch_id": "5f0c8a1e7d9b4c3a9e2f1b6d8a7c4e10",
+            "version": 2,
+            "session_date": "2026-10-02",
+            "symbol": "SPY",
+            "signal": "s1r",
+            "signal_level": 775.12,
+            "event": "TOUCH",
+            "outcome": "TRADED",
+            "position_id": "1790950500",
+            "touched_at": "2026-10-02T14:15:00.250000+00:00",
+            "underlying_mid": 775.125,
+            "forward_path": [
+                {
+                    "horizon": "1m",
+                    "offset_seconds": 60.031,
+                    "underlying": 774.985,
+                    "option_bid": 1.48,
+                },
+            ],
+        },
+        {
+            "touch_id": "0a1b2c3d4e5f60718293a4b5c6d7e8f9",
+            "version": 1,
+            "session_date": "2026-10-02",
+            "symbol": "SPY",
+            "signal": "s3r",
+            "signal_level": 778.77,
+            "event": "TOUCH",
+            "outcome": "BLOCKED_HIERARCHY",
+            "position_id": None,
+            "touched_at": "2026-10-02T15:02:11+00:00",
+            "underlying_mid": None,
+            "forward_path": [],
+        },
+    ]
+
+    # when
+    result = data_client.save_touch_events(events)
+
+    # then the events are posted exactly as given
+    assert result is None
+    mock_post.assert_called_once_with(
+        f"{data_client.base_url}/touch-events/",
+        json=events,
+        headers={
+            "Content-Type": "application/json",
+            "EETC-API-Key": data_client.api_key,
+        },
+    )
+    mock_response.raise_for_status.assert_not_called()
+
+
+# ai-generated
+@patch("src.eetc_utils.clients.eetc_data.requests.post")
+def test_save_touch_events_error(mock_post, data_client):
+    # given
+    mock_response = Mock()
+    mock_response.status_code = 400
+    mock_response.raise_for_status.side_effect = HTTPError("400 Client Error")
+    mock_post.return_value = mock_response
+    events = [{"touch_id": "0a1b2c3d4e5f60718293a4b5c6d7e8f9", "version": 1}]
+
+    # when
+    with pytest.raises(HTTPError) as error:
+        data_client.save_touch_events(events)
+
+    # then
+    assert str(error.value) == "400 Client Error"
+    mock_post.assert_called_once_with(
+        f"{data_client.base_url}/touch-events/",
+        json=events,
+        headers={
+            "Content-Type": "application/json",
+            "EETC-API-Key": data_client.api_key,
+        },
+    )
+    mock_response.raise_for_status.assert_called_once_with()
