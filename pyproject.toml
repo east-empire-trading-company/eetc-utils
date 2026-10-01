@@ -4,7 +4,7 @@ build-backend = "uv_build"
 
 [project]
 name = "eetc-utils"
-version = "1.6.0"
+version = "1.7.0"
 description = "EETC Utils Library"
 authors = [
     { name = "East Empire Trading Company", email = "eastempiretradingcompany2019@gmail.com" },
