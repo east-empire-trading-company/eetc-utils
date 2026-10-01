@@ -475,3 +475,38 @@ class EETCDataClient:
 
         if response.status_code not in [200, 201]:
             response.raise_for_status()
+
+    def save_realtime_bars(self, bars: List[Dict[str, Any]]) -> None:
+        """
+        Save one or multiple real-time bars to the EETC Data Hub.
+
+        The bars are stored as they are sent: the hub neither fills an
+        interval that has no bar nor removes a bar it was sent twice.
+
+        :param bars: List of bar dictionaries. Each bar should contain:
+            - symbol (str): Ticker symbol (e.g., "SPY")
+            - time (int): Start of the bar, in Unix seconds
+            - open (float): First price of the bar
+            - high (float): Highest price of the bar
+            - low (float): Lowest price of the bar
+            - close (float): Last price of the bar
+            - volume (float): Volume traded during the bar
+            - wap (float): Volume-weighted average price of the bar
+            - count (int): Number of trades during the bar
+        :raises requests.HTTPError: If the API request fails
+            (non-200/201 status).
+        """
+
+        url = f"{self.base_url}/realtime-bars/"
+
+        response = requests.post(
+            url,
+            json=bars,
+            headers={
+                "Content-Type": "application/json",
+                "EETC-API-Key": self.api_key,
+            },
+        )
+
+        if response.status_code not in [200, 201]:
+            response.raise_for_status()

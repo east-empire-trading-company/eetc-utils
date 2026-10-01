@@ -600,3 +600,78 @@ def test_save_roguetrader_signals_error(mock_post, data_client):
     # when / then
     with pytest.raises(HTTPError):
         data_client.save_roguetrader_signals(signals)
+
+
+# ai-generated
+@patch("src.eetc_utils.clients.eetc_data.requests.post")
+def test_save_realtime_bars_success(mock_post, data_client):
+    # given two bars with a missing interval between them
+    mock_response = Mock()
+    mock_response.status_code = 201
+    mock_post.return_value = mock_response
+    bars = [
+        {
+            "symbol": "SPY",
+            "time": 1790947800,
+            "open": 773.41,
+            "high": 773.48,
+            "low": 773.39,
+            "close": 773.45,
+            "volume": 1284.0,
+            "wap": 773.4312,
+            "count": 37,
+        },
+        {
+            "symbol": "SPY",
+            "time": 1790947815,
+            "open": 773.46,
+            "high": 773.52,
+            "low": 773.44,
+            "close": 773.5,
+            "volume": 962.0,
+            "wap": 773.4871,
+            "count": 29,
+        },
+    ]
+
+    # when
+    result = data_client.save_realtime_bars(bars)
+
+    # then the bars are posted exactly as given
+    assert result is None
+    mock_post.assert_called_once_with(
+        f"{data_client.base_url}/realtime-bars/",
+        json=bars,
+        headers={
+            "Content-Type": "application/json",
+            "EETC-API-Key": data_client.api_key,
+        },
+    )
+    mock_response.raise_for_status.assert_not_called()
+
+
+# ai-generated
+@patch("src.eetc_utils.clients.eetc_data.requests.post")
+def test_save_realtime_bars_error(mock_post, data_client):
+    # given
+    mock_response = Mock()
+    mock_response.status_code = 400
+    mock_response.raise_for_status.side_effect = HTTPError("400 Client Error")
+    mock_post.return_value = mock_response
+    bars = [{"symbol": "SPY", "time": 1790947800}]
+
+    # when
+    with pytest.raises(HTTPError) as error:
+        data_client.save_realtime_bars(bars)
+
+    # then
+    assert str(error.value) == "400 Client Error"
+    mock_post.assert_called_once_with(
+        f"{data_client.base_url}/realtime-bars/",
+        json=bars,
+        headers={
+            "Content-Type": "application/json",
+            "EETC-API-Key": data_client.api_key,
+        },
+    )
+    mock_response.raise_for_status.assert_called_once_with()
