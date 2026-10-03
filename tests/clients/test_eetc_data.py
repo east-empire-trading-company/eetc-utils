@@ -763,3 +763,85 @@ def test_save_touch_events_error(mock_post, data_client):
         },
     )
     mock_response.raise_for_status.assert_called_once_with()
+
+
+# ai-generated
+@patch("src.eetc_utils.clients.eetc_data.requests.post")
+def test_save_gex_snapshots_success(mock_post, data_client):
+    # given two snapshots a minute apart, one with two zero-gamma crossings
+    mock_response = Mock()
+    mock_response.status_code = 201
+    mock_post.return_value = mock_response
+    snapshots = [
+        {
+            "session_date": "2026-10-05",
+            "symbol": "SPY",
+            "time": "2026-10-05T13:31:00.120000+00:00",
+            "underlying": 773.125,
+            "aggregate_gex": 1250000000.5,
+            "gex_regime": "POSITIVE",
+            "zero_gamma_level": 771,
+            "zero_gamma_crossings": [771],
+            "high_gamma_strike": 774,
+            "gamma_weighted_strike": 773.42,
+            "profile": [
+                {"strike": 770, "call_gex": 900, "put_gex": -1400, "net_gamma": -500},
+                {"strike": 771, "call_gex": 1800, "put_gex": -600, "net_gamma": 1200},
+            ],
+        },
+        {
+            "session_date": "2026-10-05",
+            "symbol": "SPY",
+            "time": "2026-10-05T13:32:00.090000+00:00",
+            "underlying": None,
+            "aggregate_gex": -40000000.0,
+            "gex_regime": "NEGATIVE",
+            "zero_gamma_level": 770,
+            "zero_gamma_crossings": [770, 771],
+            "high_gamma_strike": 771,
+            "gamma_weighted_strike": 770.5,
+            "profile": [],
+        },
+    ]
+
+    # when
+    result = data_client.save_gex_snapshots(snapshots)
+
+    # then the snapshots are posted exactly as given
+    assert result is None
+    mock_post.assert_called_once_with(
+        f"{data_client.base_url}/gex-snapshots/",
+        json=snapshots,
+        headers={
+            "Content-Type": "application/json",
+            "EETC-API-Key": data_client.api_key,
+        },
+    )
+    mock_response.raise_for_status.assert_not_called()
+
+
+# ai-generated
+@patch("src.eetc_utils.clients.eetc_data.requests.post")
+def test_save_gex_snapshots_error(mock_post, data_client):
+    # given
+    mock_response = Mock()
+    mock_response.status_code = 400
+    mock_response.raise_for_status.side_effect = HTTPError("400 Client Error")
+    mock_post.return_value = mock_response
+    snapshots = [{"session_date": "2026-10-05", "symbol": "SPY"}]
+
+    # when
+    with pytest.raises(HTTPError) as error:
+        data_client.save_gex_snapshots(snapshots)
+
+    # then
+    assert str(error.value) == "400 Client Error"
+    mock_post.assert_called_once_with(
+        f"{data_client.base_url}/gex-snapshots/",
+        json=snapshots,
+        headers={
+            "Content-Type": "application/json",
+            "EETC-API-Key": data_client.api_key,
+        },
+    )
+    mock_response.raise_for_status.assert_called_once_with()

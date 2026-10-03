@@ -550,3 +550,39 @@ class EETCDataClient:
 
         if response.status_code not in [200, 201]:
             response.raise_for_status()
+
+    def save_gex_snapshots(self, snapshots: List[Dict[str, Any]]) -> None:
+        """
+        Save one or multiple RogueTrader GEX snapshots to the EETC Data
+        Hub.
+
+        A snapshot is the dealer gamma exposure of the streamed option
+        chain at one moment of the session. The hub appends every snapshot
+        it is sent, so the series of a session is its rows in time order.
+
+        :param snapshots: List of snapshot dictionaries. Each snapshot must
+            contain:
+            - session_date (str): Session date, ISO format
+            - symbol (str): Ticker symbol (e.g., "SPY")
+            - time (str): Time of the snapshot, ISO format with offset
+            and may contain the underlying's price, the aggregate GEX, its
+            regime, the zero-gamma level and every crossing, the
+            high-gamma and gamma-weighted strikes, and the profile, one
+            entry per strike with its call, put and net GEX.
+        :raises requests.HTTPError: If the API request fails
+            (non-200/201 status).
+        """
+
+        url = f"{self.base_url}/gex-snapshots/"
+
+        response = requests.post(
+            url,
+            json=snapshots,
+            headers={
+                "Content-Type": "application/json",
+                "EETC-API-Key": self.api_key,
+            },
+        )
+
+        if response.status_code not in [200, 201]:
+            response.raise_for_status()
