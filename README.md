@@ -124,8 +124,8 @@ import os
 # Initialize client (requires EETC_API_KEY environment variable)
 client = EETCDataClient(api_key=os.getenv("EETC_API_KEY"))
 
-# Fetch price data
-price_data = client.get_price_data(symbol="AAPL", start_date="2024-01-01")
+# Fetch price data (one symbol or a list, batched into few requests)
+price_data = client.get_price_data(["AAPL", "MSFT"], from_date="2024-01-01")
 
 # Get fundamentals
 fundamentals = client.get_fundamentals(symbol="AAPL")

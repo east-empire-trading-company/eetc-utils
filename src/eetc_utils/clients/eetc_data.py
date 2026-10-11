@@ -4,6 +4,9 @@ import pandas as pd
 import requests
 from requests import Response
 
+# max number of symbols the /price/ endpoint accepts per request
+PRICE_BATCH_SIZE = 500
+
 
 class EETCDataClient:
     """
@@ -55,44 +58,47 @@ class EETCDataClient:
 
     def get_price_data(
         self,
-        symbol: str,
+        symbols: Union[str, List[str]],
         date: Optional[str] = None,
         from_date: Optional[str] = None,
         to_date: Optional[str] = None,
         as_json: bool = False,
     ) -> Union[pd.DataFrame, List[Dict]]:
         """
-        Get historical price data from EETC Data Hub via REST API.
+        Get historical price data for one or more symbols from EETC Data
+        Hub via REST API.
 
-        :param symbol: Ticker symbol of the instrument (e.g., "AAPL").
+        Symbols are fetched in alphabetically sorted batches of
+        PRICE_BATCH_SIZE, since each request costs about the same in
+        BigQuery whether it reads one symbol or hundreds.
+
+        :param symbols: Ticker symbol (e.g., "AAPL") or list of ticker
+            symbols.
         :param date: Specific date in format "yyyy-mm-dd".
         :param from_date: Earliest date in format "yyyy-mm-dd".
         :param to_date: Latest date in format "yyyy-mm-dd".
         :param as_json: If True, returns raw JSON list; if False
             (default), returns pandas DataFrame.
-        :return: Historical price data as pandas DataFrame (default) or
-            list of dicts (if as_json=True).
+        :return: Historical price data as pandas DataFrame sorted by
+            symbol and date (default) or list of dicts (if as_json=True).
         :raises requests.HTTPError: If the API request fails.
         """
 
-        url = f"{self.base_url}/price/?symbol={symbol}"
-        params = {}
+        if isinstance(symbols, str):
+            symbols = [symbols]
 
-        # add optional query params
-        if date:
-            params["date"] = date
+        symbols = sorted(set(symbols))
+        url = f"{self.base_url}/price/"
+        params = {"date": date, "from_date": from_date, "to_date": to_date}
+        params = {k: v for k, v in params.items() if v is not None}
 
-        if from_date:
-            params["from_date"] = from_date
-
-        if to_date:
-            params["to_date"] = to_date
-
-        # send the HTTP request to EETC Data Hub
-        response = self._send_http_request(url, params)
-
-        # process and return response data
-        response_data = response.json()
+        response_data = []
+        for i in range(0, len(symbols), PRICE_BATCH_SIZE):
+            batch = symbols[i : i + PRICE_BATCH_SIZE]
+            response = self._send_http_request(
+                url, {**params, "symbols": ",".join(batch)}
+            )
+            response_data.extend(response.json())
 
         if as_json:
             return response_data
@@ -101,7 +107,7 @@ class EETCDataClient:
             return pd.DataFrame()
 
         df = pd.json_normalize(response_data)
-        df = df.sort_values(by=["date"])
+        df = df.sort_values(by=["symbol", "date"], ignore_index=True)
 
         return df
 

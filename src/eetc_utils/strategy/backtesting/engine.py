@@ -22,7 +22,7 @@ class BacktestEngine:
 
         # fetch input data
         price_df = self.eetc_data_client.get_price_data(
-            symbol=symbol, from_date=start, to_date=end
+            symbol, from_date=start, to_date=end
         )
         context = {
             "engine": self,

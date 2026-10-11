@@ -117,11 +117,12 @@ def test_get_price_data_with_date_filters(mock_send, data_client):
     mock_response = Mock()
     mock_response.json.return_value = []
     mock_send.return_value = mock_response
-    expected_url = f"{data_client.base_url}/price/?symbol=AAPL"
+    expected_url = f"{data_client.base_url}/price/"
     expected_params = {
         "date": "2024-01-01",
         "from_date": "2024-01-01",
         "to_date": "2024-12-31",
+        "symbols": "AAPL",
     }
 
     # when
@@ -134,6 +135,40 @@ def test_get_price_data_with_date_filters(mock_send, data_client):
 
     # then
     mock_send.assert_called_once_with(expected_url, expected_params)
+
+
+# ai-generated
+@patch.object(EETCDataClient, "_send_http_request")
+def test_get_price_data_batches_sorted_symbols(mock_send, data_client):
+    # given
+    first_response = Mock()
+    first_response.json.return_value = [
+        {"symbol": "MSFT", "date": "2024-01-02", "close": 2.0},
+        {"symbol": "AAPL", "date": "2024-01-01", "close": 1.0},
+    ]
+    second_response = Mock()
+    second_response.json.return_value = [
+        {"symbol": "TSLA", "date": "2024-01-01", "close": 3.0},
+    ]
+    mock_send.side_effect = [first_response, second_response]
+    expected_url = f"{data_client.base_url}/price/"
+
+    # when
+    with patch("src.eetc_utils.clients.eetc_data.PRICE_BATCH_SIZE", 2):
+        result = data_client.get_price_data(
+            ["TSLA", "MSFT", "AAPL", "MSFT"], from_date="2024-01-01"
+        )
+
+    # then
+    assert mock_send.call_count == 2
+    mock_send.assert_any_call(
+        expected_url, {"from_date": "2024-01-01", "symbols": "AAPL,MSFT"}
+    )
+    mock_send.assert_any_call(
+        expected_url, {"from_date": "2024-01-01", "symbols": "TSLA"}
+    )
+    assert list(result["symbol"]) == ["AAPL", "MSFT", "TSLA"]
+    assert list(result["close"]) == [1.0, 2.0, 3.0]
 
 
 # ai-generated

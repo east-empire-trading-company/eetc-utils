@@ -21,9 +21,7 @@ class Engine:
         }  # output
 
         # fetch input data
-        price_df = self.client.get_price_data(
-            symbol=symbol, from_date=start, to_date=end
-        )
+        price_df = self.client.get_price_data(symbol, from_date=start, to_date=end)
         context = {
             "engine": self,
             "symbol": symbol,
