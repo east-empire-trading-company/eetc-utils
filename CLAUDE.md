@@ -1,108 +1,45 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+eetc-utils: a Python library of reusable utilities for financial analysis and
+algorithmic trading — quant finance and options math, API clients (EETC Data
+Hub, EETC Notifications Manager, Claude) and a strategy/backtesting framework.
+Published to PyPI as `eetc-utils` and used across EETC (East Empire Trading
+Company) projects.
 
-## Project Overview
+## MANDATORY WORKFLOW RULES
 
-eetc-utils is a Python library providing reusable utilities for financial analysis and algorithmic trading. It's published to PyPI as `eetc-utils` and is used across EETC (East Empire Trading Company) projects.
+YOU MUST follow these rules without exception:
 
-## Development Commands
+**1. Plan before acting on complex tasks**
+For any non-trivial task involving multiple steps, multiple files, or
+architectural decisions: YOU MUST enter Plan Mode first. Load the
+`codebase-overview` skill to understand the architecture before exploring
+files. Form a plan and confirm the approach before writing any code. Do NOT
+jump straight to implementation.
 
-### Environment Setup
-```bash
-sudo apt-get install build-essential
-make install_python_requirements
-```
+**2. YOU MUST load and apply the python-code-style skill before writing any Python code**
+Skill: `eetc:python-code-style`
 
-### Code Formatting
-```bash
-make reformat_code  # Runs `uv run black .` to format all Python code
-```
+**3. YOU MUST load and apply the python-tests skill before writing, editing, or generating tests**
+Skill: `eetc:python-tests`
 
-### Testing
-```bash
-python -m pytest tests/
-python -m pytest tests/test_financials.py  # Run single test file
-```
+**4. YOU MUST run /simplify after writing code and before running tests**
+After finishing an implementation, invoke the `/simplify` skill to review
+the changed code for reuse, quality, and efficiency — and fix any issues
+found — before proceeding to run tests.
 
-### Package Publishing
+**5. YOU MUST load and apply the git-conventions skill before creating commits or PRs**
+Skill: `eetc:git-conventions`
+Small project — work and commit directly on `master`. Only branch or open a
+PR when the user explicitly asks.
 
-**Important**: Before publishing, update the `version` field in the `[project]` section of `pyproject.toml`, and update `[project.dependencies]` / `[dependency-groups]` if dependencies changed. The `[build-system]` table (`uv_build`) should not normally need to change.
+**6. Format with black; code line length 88, docstrings 80**
+Run `make reformat_code` after editing Python code. Private methods (prefixed
+with `_`) get docstrings too.
 
-```bash
-# Build the package
-uv build
-
-# Test on PyPI Test
-make publish_package_on_pypi_test
-
-# Publish to production PyPI
-make publish_package_on_pypi
-```
-
-## Architecture
-
-### Module Structure
-
-The library is organized into four main areas:
-
-1. **Finance Utilities** (`src/eetc_utils/finance.py`)
-   - Quantitative finance functions: Kelly Criterion, DCF valuation, volatility forecasting
-   - GARCH model integration for volatility analysis
-   - OHLC data manipulation utilities
-
-2. **API Clients** (`src/eetc_utils/clients/`)
-   - **EETCDataClient** (`eetc_data.py`): HTTP client for EETC Data Hub API
-     - Fetches price data, fundamentals, macroeconomic indicators, and order history
-     - Requires `EETC_API_KEY` environment variable or explicit API key
-     - All methods support returning data as pandas DataFrame (default) or raw JSON
-   - **EETCNotificationsClient** (`eetc_notifications.py`): Client for EETC Notifications Manager
-     - Sends trade updates and notifications to Telegram channels
-     - Requires API key for authentication
-   - **ClaudeClient** (`claude.py`): Simple wrapper around the Anthropic SDK
-     - Sends single- and multi-turn text prompts to Claude
-     - Requires `ANTHROPIC_API_KEY` environment variable or explicit API key
-     - Exposes the underlying `anthropic.Anthropic` client for advanced use
-
-3. **Strategy Framework** (`src/eetc_utils/strategy/`)
-   - **Live Trading**: `strategy.py` - Base `Strategy` class (ABC) for live trading strategies
-   - **Execution Engine**: `engine.py` - Engine for running live/paper trading strategies
-   - **Backtesting** (`backtesting/`):
-     - `strategy.py`: Simplified `Strategy` base class for historical testing
-     - `engine.py`: `BacktestEngine` orchestrates backtesting runs, saves results to `results/` directory
-     - `broker_sim.py`: `BrokerSim` simulates order execution with configurable slippage and commission
-     - `metrics.py`: Computes performance statistics (Sharpe, max drawdown, etc.)
-
-### Strategy Pattern
-
-**Two distinct Strategy base classes exist:**
-
-- `src/eetc_utils/strategy/strategy.py` - For live trading (ABC with abstract methods)
-- `src/eetc_utils/strategy/backtesting/strategy.py` - For backtesting (simplified interface)
-
-Both follow lifecycle pattern: `on_start()` → `on_data()` (per bar/tick) → `on_stop()`
-
-The backtesting strategy receives a `context` dict containing:
-- `engine`: Reference to the BacktestEngine
-- `symbol`: The instrument being traded
-- `place_order`: Lambda function for order placement
-
-## Coding Conventions
-
-Shared EETC conventions come from the `eetc` plugin — apply them:
-
-- Writing or editing Python code: `eetc:python-code-style`
-- After writing code, before running tests: run `/simplify` (built-in)
-- Writing or editing tests: `eetc:python-tests`
-- Commits and PRs: `eetc:git-conventions`
-
-Project-specific additions:
-
-- Format with `black` (`make reformat_code`); code line length 88 (black
-  default), docstrings 80
-- Private methods (prefixed with `_`) get docstrings too
-- Keep data-fetching methods on one structure: a private helper sends the HTTP
-  request, public methods build params and parse the response:
+**7. Keep API client methods on one structure**
+A private helper sends the HTTP request; public methods build params and
+parse the response (see `EETCDataClient._send_http_request`):
 
 ```python
 def _send_http_request(self, url: str, params: Optional[Dict[str, Any]]) -> Response:
@@ -115,27 +52,43 @@ def get_price_data(self, symbol: str) -> pd.DataFrame:
     ...
 ```
 
-### Testing
+**8. Import paths use the `src.eetc_utils` prefix**
+In source and tests, e.g.
+`from src.eetc_utils.finance import calculate_optimal_leverage_kelly`.
 
-- **pytest**, **function-based tests** (not classes)
-- Test folder structure mirrors `src/eetc_utils`
-- All shared fixtures belong in `tests/conftest.py`
-- Mock the EETC Data Hub, Notifications Manager and Anthropic APIs
+**9. Bump the version before publishing**
+Before a release, update `version` in the `[project]` section of
+`pyproject.toml`, and `[project.dependencies]` / `[dependency-groups]` if
+dependencies changed. The `[build-system]` table (`uv_build`) should not
+normally need to change. Never publish to PyPI unless the user asks.
 
-## Dependencies
+## Key Files
 
-The project uses uv for dependency management, packaging, and
-publishing (`pyproject.toml` + `uv.lock`). Core dependencies:
-- `pandas`: Data manipulation
-- `numpy`: Numerical operations
-- `arch`: GARCH models for volatility forecasting
-- `black`: Code formatting
-- `requests`: HTTP client for data API
+| File | Purpose |
+|------|---------|
+| `src/eetc_utils/finance.py` | Kelly criterion, DCF valuation, GARCH volatility, OHLC helpers |
+| `src/eetc_utils/options.py` | Black-Scholes pricing, GEX, strike ranges, IV conversion |
+| `src/eetc_utils/clients/eetc_data.py` | `EETCDataClient` — EETC Data Hub API (get + save endpoints) |
+| `src/eetc_utils/clients/eetc_notifications.py` | `EETCNotificationsClient` — Telegram / X / email via Notifications Manager |
+| `src/eetc_utils/clients/claude.py` | `ClaudeClient` — thin wrapper around the Anthropic SDK |
+| `src/eetc_utils/strategy/` | Strategy base classes, engines, backtesting (`BrokerSim`, metrics) |
+| `tests/conftest.py` | All shared fixtures (clients, mock API payloads, OHLC frames) |
+| `pyproject.toml` | Package metadata, version, dependencies, uv build/index config |
+| `Makefile` | Install, lock upgrade, format and publish targets |
+| `.pypirc` | PyPI / TestPyPI API tokens used by the publish targets (secrets — DO NOT READ) |
 
-Python version: 3.12+
+## Project-Specific Commands
 
-## Important Notes
+```bash
+make install_python_requirements                            # uv sync
+make update_python_requirements                             # uv lock --upgrade && uv sync
+make reformat_code                                          # uv run black .
+source .venv/bin/activate && python -m pytest tests/        # run all tests
+source .venv/bin/activate && python -m pytest tests/test_finance.py  # run one test file
+uv build                                                    # build sdist + wheel into dist/
+make publish_package_on_pypi_test                           # publish to TestPyPI (only when asked)
+make publish_package_on_pypi                                # publish to PyPI (only when asked)
+```
 
-- Import paths use `src.eetc_utils` prefix (e.g., `from src.eetc_utils.finance import calculate_optimal_leverage_kelly`)
-- API key for EETC Data Hub can be set via `EETC_API_KEY` environment variable
-- Backtest results are saved to `results/` directory with naming pattern: `{strategy_name}__{symbol}__[trades.json|equity.csv|perf.json]`
+System setup on Linux: `sudo apt-get install build-essential` before
+`make install_python_requirements`.

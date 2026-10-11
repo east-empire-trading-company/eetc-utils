@@ -1,10 +1,62 @@
 {
   "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "permissions": {
+    "allow": [
+      "Bash(git *)",
+      "Bash(ls *)",
+      "Bash(ls)",
+      "Bash(cat *)",
+      "Bash(grep *)",
+      "Bash(find *)",
+      "Bash(echo *)",
+      "Bash(pwd)",
+      "Bash(which *)",
+      "Bash(wc *)",
+      "Bash(head *)",
+      "Bash(tail *)",
+      "Bash(diff *)",
+      "Bash(sort *)",
+      "Bash(uniq *)",
+      "Bash(awk *)",
+      "Bash(sed *)",
+      "Bash(pytest *)",
+      "Bash(pytest)",
+      "Bash(python -m pytest *)",
+      "Bash(uv *)",
+      "Bash(make install_python_requirements)",
+      "Bash(make update_python_requirements)",
+      "Bash(make reformat_code)"
+    ],
+    "deny": [
+      "Read(./.env)",
+      "Read(./.env.*)",
+      "Edit(./.env)",
+      "Edit(./.env.*)",
+      "Read(./secrets/**)",
+      "Read(./.pypirc)",
+      "Edit(./.pypirc)",
+      "Bash(uv publish *)",
+      "Bash(uv publish)"
+    ],
+    "defaultMode": "default"
+  },
   "extraKnownMarketplaces": {
     "eetc-claude-code": {
       "source": {
         "source": "github",
         "repo": "contrastiskey/eetc-claude-code"
+      }
+    },
+    "ponytail": {
+      "source": {
+        "source": "github",
+        "repo": "DietrichGebert/ponytail"
+      }
+    },
+    "typesafe-ai": {
+      "source": {
+        "source": "github",
+        "repo": "typesafe-ai/skills"
       }
     }
   },
