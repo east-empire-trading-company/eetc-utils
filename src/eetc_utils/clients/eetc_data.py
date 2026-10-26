@@ -27,7 +27,7 @@ class EETCDataClient:
 
     def __init__(self, api_key: str):
         self.api_key = api_key
-        self.base_url = "https://eetc-data-hub-service-nb7ewdzv6q-ue.a.run.app/api"
+        self.base_url = "https://eetc-data-hub-148296566920.us-east1.run.app/api"
 
     def _send_http_request(
         self, url: str, params: Optional[Dict[str, Any]]

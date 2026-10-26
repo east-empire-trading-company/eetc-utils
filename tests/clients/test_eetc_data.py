@@ -9,7 +9,7 @@ from src.eetc_utils.clients.eetc_data import EETCDataClient
 # ai-generated
 def test_client_initialization(api_key):
     # given
-    expected_base_url = "https://eetc-data-hub-service-nb7ewdzv6q-ue.a.run.app/api"
+    expected_base_url = "https://eetc-data-hub-148296566920.us-east1.run.app/api"
 
     # when
     client = EETCDataClient(api_key=api_key)
