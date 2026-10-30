@@ -39,7 +39,7 @@ Repository = "https://github.com/east-empire-trading-company/eetc-utils"
 
 [dependency-groups]
 dev = [
-    "black>=25.9.0,<26.0.0",
+    "black>=25.9.0,<27.0.0",
     "pytest>=9.0.1,<10.0.0",
 ]
 
