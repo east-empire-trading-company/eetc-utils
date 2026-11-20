@@ -26,19 +26,17 @@ def test_send_message_to_telegram_success(mock_post, notifications_client):
     # given
     mock_response = Mock()
     mock_response.status_code = 200
-    mock_response.json.return_value = {"status": "success", "message_id": 123}
+    message = "<b>Trade executed</b>: BUY 100 AAPL @ $150.25"
+    mock_response.json.return_value = {"message": message}
     mock_post.return_value = mock_response
-    message = "Trade executed: BUY 100 AAPL @ $150.25"
 
     # when
     result = notifications_client.send_message_to_telegram(message)
 
     # then
-    assert result == {"status": "success", "message_id": 123}
-    assert result["status"] == "success"
-    assert result["message_id"] == 123
+    assert result == {"message": message}
     mock_post.assert_called_once_with(
-        f"{notifications_client.base_url}/api/v1/telegram/send_trade_update",
+        f"{notifications_client.base_url}/api/v1/telegram/send_message",
         json={"message": message},
         headers={"X-API-Key": notifications_client.api_key},
     )
@@ -78,7 +76,7 @@ def test_send_post_on_x_success(mock_post, notifications_client):
     assert result == {"message": "Trade executed: BUY 100 AAPL @ $150.25"}
     assert result["message"] == message
     mock_post.assert_called_once_with(
-        f"{notifications_client.base_url}/api/v1/x/send_trade_update",
+        f"{notifications_client.base_url}/api/v1/x/post",
         json={"message": message},
         headers={"X-API-Key": notifications_client.api_key},
     )

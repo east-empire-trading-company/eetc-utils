@@ -21,7 +21,7 @@ A Python library providing reusable utilities for financial analysis and algorit
 
 ### API Clients
 - **EETC Data Hub Client**: Fetch price data, fundamentals, macroeconomic indicators, and order history
-- **EETC Notifications Client**: Send trade updates and notifications to Telegram channels
+- **EETC Notifications Client**: Send notifications to Telegram, X and email
 - **Claude Client**: Simple wrapper around the Anthropic SDK for single- and multi-turn text completions
 
 ### Strategy Framework
@@ -143,8 +143,18 @@ import os
 # Initialize client (requires EETC_API_KEY environment variable)
 client = EETCNotificationsClient(api_key=os.getenv("EETC_API_KEY"))
 
-# Send trade update via Telegram
-client.send_trade_update_to_telegram(msg="Shorted TSLA x100 at 1312.69.")
+# Send a Telegram HTML message (escape literal <, > and &)
+client.send_message_to_telegram(msg="<b>Shorted</b> TSLA x100 at 1312.69.")
+
+# Post plain text on X (max 280 characters)
+client.send_post_on_x(msg="Shorted TSLA x100 at 1312.69.")
+
+# Send an HTML email (all recipients see each other)
+client.send_email(
+    subject="Weekly report",
+    body_html="<h1>Report</h1>",
+    recipients=["someone@example.com"],
+)
 ```
 
 ### Claude Client
@@ -267,8 +277,10 @@ src/eetc_utils/
   - `get_fundamentals()`: Get company fundamentals
   - `get_macro_indicators()`: Fetch macroeconomic indicators
   - `get_order_history()`: Retrieve order history
-- **EETCNotificationsClient**: Send trading notifications via Telegram
-  - `send_trade_update_to_telegram()`: Send trade notifications
+- **EETCNotificationsClient**: Send notifications via Telegram, X and email
+  - `send_message_to_telegram()`: Send a Telegram HTML message
+  - `send_post_on_x()`: Post plain text on X
+  - `send_email()`: Send an HTML email
 - **ClaudeClient**: Simple wrapper around the Anthropic SDK
   - `send_message()`: Send a single- or multi-turn text prompt to Claude
 
