@@ -1,7 +1,7 @@
 # EETC Utils
 
 [![PyPI version](https://badge.fury.io/py/eetc-utils.svg)](https://badge.fury.io/py/eetc-utils)
-[![Python 3.12+](https://img.shields.io/badge/python-3.12+-blue.svg)](https://www.python.org/downloads/)
+[![Python 3.14+](https://img.shields.io/badge/python-3.14+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 A Python library providing reusable utilities for financial analysis and algorithmic trading. Built by [East Empire Trading Company](https://github.com/east-empire-trading-company) for quantitative finance and trading strategy development.
