@@ -5,6 +5,8 @@ import numpy as np
 import pandas as pd
 from arch import arch_model
 
+logger = logging.getLogger(__name__)
+
 
 def garch_annualized_volatility(df: pd.DataFrame) -> float:
     """
@@ -90,9 +92,9 @@ def calculate_optimal_leverage_kelly(
     # GARCH needs more data (typically 100+ observations)
     min_observations = 100 if use_garch else 30
     if len(df) < min_observations:
-        logging.warning(
-            f"Only {len(df)} data observations available. "
-            f"Need at least {min_observations} observations.",
+        logger.warning(
+            "Not enough observations for Kelly.",
+            extra={"observations": len(df), "min_observations": min_observations},
         )
         return 0.0
 
@@ -123,8 +125,9 @@ def calculate_optimal_leverage_kelly(
 
     # Kelly Criterion: f* = μ / σ²
     if annualized_variance == 0 or not np.isfinite(annualized_variance):
-        logging.warning(
-            "Zero/invalid variance detected. Cannot calculate Kelly.",
+        logger.warning(
+            "Zero or invalid variance, cannot calculate Kelly.",
+            extra={"annualized_variance": annualized_variance},
         )
         return 0.0
 
@@ -132,9 +135,9 @@ def calculate_optimal_leverage_kelly(
 
     # Kelly can be negative if expected return is negative
     if optimal_leverage < 0:
-        logging.warning(
-            f"Negative Kelly: ({optimal_leverage:.4f}). "
-            f"Expected return is negative.",
+        logger.warning(
+            "Negative Kelly, expected return is negative.",
+            extra={"optimal_leverage": optimal_leverage},
         )
         return 0.0
 

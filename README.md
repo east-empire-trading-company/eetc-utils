@@ -29,6 +29,10 @@ A Python library providing reusable utilities for financial analysis and algorit
 - **Execution Engine**: Production-ready engine for running trading strategies
 - **Backtesting Framework**: Complete backtesting suite with broker simulation, performance metrics, and result persistence
 
+### Structured Logging
+- **Cloud Logging JSON**: One JSON line per log record on stdout, with correct severity, `extra` fields and single-line tracebacks
+- **Trace IDs**: Optional trace field per call, bound per request or from a custom getter, plus `traceparent` / `X-Cloud-Trace-Context` parsing
+
 ## Installation
 
 ```bash
@@ -228,6 +232,25 @@ print(f"Sharpe Ratio: {results['sharpe_ratio']:.2f}")
 print(f"Max Drawdown: {results['max_drawdown']:.2%}")
 ```
 
+### Structured Logging
+
+```python
+import logging
+
+from eetc_utils.logging import configure_logging
+
+# Reads LOG_FORMAT (json/text), LOG_LEVEL and GOOGLE_CLOUD_PROJECT
+configure_logging()
+
+logger = logging.getLogger(__name__)
+
+# Constant message, variable data in extra fields
+logger.info("Result written.", extra={"result.rows": 42, "duration_ms": 120})
+```
+
+See [docs/logging.md](docs/logging.md) for the full logging standard, including
+trace IDs.
+
 ## Documentation
 
 ### Module Structure
@@ -236,6 +259,7 @@ print(f"Max Drawdown: {results['max_drawdown']:.2%}")
 src/eetc_utils/
 ├── finance.py              # Quantitative finance utilities
 ├── options.py              # Options pricing and Greeks
+├── logging.py              # Structured logging for Google Cloud Logging
 ├── clients/
 │   ├── eetc_data.py       # EETC Data Hub API client
 │   ├── eetc_notifications.py  # Notifications client
@@ -270,6 +294,11 @@ src/eetc_utils/
 - `PDF()`: Standard normal probability density function
 - `CND()`: Cumulative normal distribution
 - `D1()`, `D2()`: Black-Scholes d1 and d2 calculations
+
+#### Logging Module (`logging.py`)
+- `configure_logging()`: Install the JSON (or text) stdout handler on the root logger
+- `JSONFormatter`: Formatter writing Cloud Logging JSON lines, for custom logging setups
+- `extract_trace_id()`: Read the trace ID from `traceparent` / `X-Cloud-Trace-Context` headers
 
 #### API Clients
 - **EETCDataClient**: HTTP client for fetching market data and fundamentals
@@ -385,6 +414,9 @@ The Makefile commands automatically read credentials from `.pypirc` and pass the
 
 - `EETC_API_KEY`: API key for EETC Data Hub client (required for data access)
 - `ANTHROPIC_API_KEY`: API key for Claude client (required for Claude API access)
+- `LOG_FORMAT`: `json` (default) or `text` for readable local output, read by `configure_logging()`
+- `LOG_LEVEL`: `debug`, `info` (default), `warning` or `error`, read by `configure_logging()`
+- `GOOGLE_CLOUD_PROJECT`: Project ID for the Cloud Logging trace field (optional)
 
 ## Contributing
 

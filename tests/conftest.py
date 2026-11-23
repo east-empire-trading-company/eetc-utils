@@ -1,3 +1,5 @@
+import logging
+
 import pytest
 import pandas as pd
 
@@ -286,3 +288,17 @@ def sample_daily_ohlc_for_weekly_conversion():
     }
 
     return pd.DataFrame(data)
+
+
+@pytest.fixture
+def restore_root_logger():
+    """
+    Fixture restoring the root logger's handlers and level after a test that
+    calls configure_logging.
+    """
+
+    root = logging.getLogger()
+    handlers, level = root.handlers[:], root.level
+    yield root
+    root.handlers[:] = handlers
+    root.setLevel(level)
