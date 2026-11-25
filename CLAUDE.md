@@ -71,6 +71,7 @@ normally need to change. Never publish to PyPI unless the user asks.
 | `src/eetc_utils/clients/eetc_data.py` | `EETCDataClient` — EETC Data Hub API (get + save endpoints) |
 | `src/eetc_utils/clients/eetc_notifications.py` | `EETCNotificationsClient` — Telegram / X / email via Notifications Manager |
 | `src/eetc_utils/clients/claude.py` | `ClaudeClient` — thin wrapper around the Anthropic SDK |
+| `src/eetc_utils/clients/jev.py` | `JevClient` / `JevClientAsync` — sync and async wrappers around the TypeSafe SDK for Jev judgments, plus `jev_cost_usd` |
 | `src/eetc_utils/strategy/` | Strategy base classes, engines, backtesting (`BrokerSim`, metrics) |
 | `tests/conftest.py` | All shared fixtures (clients, mock API payloads, OHLC frames) |
 | `pyproject.toml` | Package metadata, version, dependencies, uv build/index config |

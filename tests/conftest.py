@@ -2,10 +2,12 @@ import logging
 
 import pytest
 import pandas as pd
+from typesafe_sdk import SystemOneResponse
 
 from src.eetc_utils.clients.claude import ClaudeClient
 from src.eetc_utils.clients.eetc_data import EETCDataClient
 from src.eetc_utils.clients.eetc_notifications import EETCNotificationsClient
+from src.eetc_utils.clients.jev import JevClient, JevClientAsync
 
 
 @pytest.fixture
@@ -53,6 +55,58 @@ def claude_client(api_key):
     """
 
     return ClaudeClient(api_key=api_key)
+
+
+@pytest.fixture
+def jev_client(api_key):
+    """
+    Fixture providing a JevClient instance.
+
+    :param api_key: API key from the api_key fixture.
+    :return: JevClient instance for testing.
+    """
+
+    return JevClient(api_key=api_key)
+
+
+@pytest.fixture
+def jev_client_async(api_key):
+    """
+    Fixture providing a JevClientAsync instance.
+
+    :param api_key: API key from the api_key fixture.
+    :return: JevClientAsync instance for testing.
+    """
+
+    return JevClientAsync(api_key=api_key)
+
+
+@pytest.fixture
+def mock_jev_response():
+    """
+    Fixture providing a Jev response with a noul and a choice answer.
+
+    The answering model is a pinned version, as the API reports it even when
+    ``jev-latest`` was asked for.
+
+    :return: SystemOneResponse as the TypeSafe SDK returns it.
+    """
+
+    return SystemOneResponse.model_validate(
+        {
+            "model": "jev-1.14.0",
+            "usage": {"input_tokens": 1200, "output_tokens": 9},
+            "answers": {
+                "fundamental": {"type": "noul", "noul": 0.82},
+                "sector": {
+                    "type": "choice",
+                    "choice": "tech",
+                    "confidence": 0.9,
+                    "probabilities": {"tech": 0.9, "energy": 0.1},
+                },
+            },
+        }
+    )
 
 
 @pytest.fixture

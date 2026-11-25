@@ -24,7 +24,8 @@ caller (other EETC project / script)
   ├── clients/
   │     ├── EETCDataClient ─────────────→ EETC Data Hub API (Cloud Run)
   │     ├── EETCNotificationsClient ────→ EETC Notifications Manager (Cloud Run)
-  │     └── ClaudeClient ───────────────→ Anthropic API (anthropic SDK)
+  │     ├── ClaudeClient ───────────────→ Anthropic API (anthropic SDK)
+  │     └── JevClient / JevClientAsync ─→ TypeSafe Jev (typesafe-sdk)
   └── strategy/
         ├── Engine / BacktestEngine ─→ EETCDataClient.get_price_data
         │       └─→ Strategy.on_start → on_data (per bar) → on_stop
@@ -79,6 +80,7 @@ anything other than 200/201. `_send_http_request` is GET-only.
 | `EETCDataClient` | `src/eetc_utils/clients/eetc_data.py` | EETC Data Hub — price, fundamentals, indicators, companies, orders, RogueTrader signals; saves orders, signals, realtime bars, touch events, GEX snapshots. Auth header `EETC-API-Key` |
 | `EETCNotificationsClient` | `src/eetc_utils/clients/eetc_notifications.py` | EETC Notifications Manager — `send_message_to_telegram`, `send_post_on_x`, `send_email`. Auth header `X-API-Key` |
 | `ClaudeClient` | `src/eetc_utils/clients/claude.py` | Anthropic API via `anthropic.Anthropic`; `send_message` for single/multi-turn text; underlying SDK exposed as `.client` |
+| `JevClient` / `JevClientAsync` | `src/eetc_utils/clients/jev.py` | TypeSafe Jev via `TypeSafeClient` / `AsyncTypeSafeClient`; `judge(state, questions, model=None)` returns the SDK's `SystemOneResponse` unchanged and logs model, tokens and cost; `jev_cost_usd` prices a request; underlying SDK exposed as `.client` |
 | `arch` | PyPI | GARCH model in `garch_annualized_volatility` |
 
 Base URLs for both EETC services are hard-coded in the client constructors.
@@ -89,6 +91,7 @@ Base URLs for both EETC services are hard-coded in the client constructors.
 |----------|---------|
 | `EETC_API_KEY` | EETC Data Hub key. Read only by `strategy/engine.py` `Engine`, where it **overrides** the `eetc_api_key` argument. `EETCDataClient`, `EETCNotificationsClient` and `BacktestEngine` take the key explicitly |
 | `ANTHROPIC_API_KEY` | Fallback used by the `anthropic` SDK when `ClaudeClient(api_key=None)` |
+| `TYPESAFE_API_KEY` | Fallback used by the `typesafe-sdk` when `JevClient(api_key=None)` / `JevClientAsync(api_key=None)`; the SDK raises `TypeSafeError` if neither is set |
 
 The library reads no other configuration. Publishing tokens live in
 `.pypirc` (secrets — DO NOT READ), extracted by the Makefile publish targets.
@@ -127,14 +130,17 @@ General rules: `eetc:python-tests`.
   tests, not classes; `# ai-generated` marker and `# given / # when / # then`
   sections. The strategy framework has no tests yet.
 - Fixtures: all shared fixtures live in `tests/conftest.py` — `api_key`,
-  `data_client`, `notifications_client`, `claude_client`, mock payloads
+  `data_client`, `notifications_client`, `claude_client`, `jev_client`, `jev_client_async`,
+  `mock_jev_response`, mock payloads
   (`mock_price_data`, `mock_fundamentals_data`, `mock_indicator_data`,
   `mock_indicators_list`, `mock_companies_data`, `mock_orders_data`,
   `mock_roguetrader_signals_data`) and OHLC frames (`sample_ohlc_dataframe`,
   `sample_daily_ohlc_for_weekly_conversion`).
 - Mock: the EETC Data Hub and Notifications Manager (`unittest.mock.patch` on
   the module's `requests.get` / `requests.post`) and the Anthropic API
-  (`patch.object(claude_client.client.messages, "create", ...)`). Never hit a
+  (`patch.object(claude_client.client.messages, "create", ...)`) and TypeSafe
+  (`patch.object(jev_client.client, "system_one", ...)`, `AsyncMock` for the
+  async client, run with `asyncio.run`). Never hit a
   real service from tests.
 - Run:
 
