@@ -23,6 +23,7 @@ A Python library providing reusable utilities for financial analysis and algorit
 - **EETC Data Hub Client**: Fetch price data, fundamentals, macroeconomic indicators, and order history
 - **EETC Notifications Client**: Send notifications to Telegram, X and email
 - **Claude Client**: Simple wrapper around the Anthropic SDK for single- and multi-turn text completions
+- **Jev Clients**: Sync and async wrappers around the TypeSafe SDK for typed Jev judgments (`Noul`, `Choice`, `Score`)
 
 ### Strategy Framework
 - **Live Trading**: Abstract base classes for implementing live/paper trading strategies
@@ -182,6 +183,41 @@ response = client.send_message(
         {"role": "assistant", "content": "Nice to meet you, Alice."},
     ],
 )
+```
+
+
+### Jev Client
+
+```python
+import os
+
+from eetc_utils.clients.jev import JevClient, JevClientAsync, Noul, TypeSafeError
+
+# Initialize client (falls back to the TYPESAFE_API_KEY environment variable)
+jev = JevClient(api_key=os.getenv("TYPESAFE_API_KEY"))
+
+# Ask typed questions about a state; answers come back by the names you gave them
+response = jev.judge(
+    {"headline": "ACME raises full-year guidance 20%"},
+    {"fundamental": Noul(instructions="Is `headline` about a fundamental change?")},
+)
+if response.nouls["fundamental"].noul >= 0.7:  # your own cut-off
+    ...
+
+# Defaults to jev-latest; pin a model where a threshold was tuned on one
+response = jev.judge(state, questions, model="jev-1.13.0")
+response.model                # the version that answered
+response.usage.input_tokens   # the billed tokens
+
+# Errors propagate: deciding whether a failure stops you is up to the caller
+try:
+    response = jev.judge(state, questions)
+except TypeSafeError:
+    ...
+
+# Async apps: same constructor and judge(), awaited
+jev_async = JevClientAsync(api_key=os.getenv("TYPESAFE_API_KEY"))
+response = await jev_async.judge(state, questions)
 ```
 
 

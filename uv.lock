@@ -1,5 +1,5 @@
 version = 1
-revision = 5
+revision = 3
 requires-python = ">=3.14, <4.0"
 resolution-markers = [
     "sys_platform == 'win32'",
@@ -223,7 +223,7 @@ wheels = [
 
 [[package]]
 name = "eetc-utils"
-version = "2.1.1"
+version = "2.2.0"
 source = { editable = "." }
 dependencies = [
     { name = "anthropic" },
@@ -231,6 +231,7 @@ dependencies = [
     { name = "numpy" },
     { name = "pandas" },
     { name = "requests" },
+    { name = "typesafe-sdk" },
 ]
 
 [package.dev-dependencies]
@@ -247,6 +248,7 @@ requires-dist = [
     { name = "numpy", specifier = ">=2.3.4,<3.0.0" },
     { name = "pandas", specifier = ">=2.3.3,<4.0.0" },
     { name = "requests", specifier = ">=2.28.0,<3.0.0" },
+    { name = "typesafe-sdk", specifier = ">=0.7.5,<1.0.0" },
 ]
 
 [package.metadata.requires-dev]
@@ -872,6 +874,15 @@ wheels = [
 ]
 
 [[package]]
+name = "tenacity"
+version = "9.2.1"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/82/9e/497c1c8ebe5a5b5d1d4a7511aea22c0bb1a97e3170d98abdef0e1b34265a/tenacity-9.2.1.tar.gz", hash = "sha256:a606b5c808d0cded4a359d5b9932d867ff2a6a6b64d37350260fd01bbdf83839", size = 58261, upload-time = "2026-10-07T12:13:01.633Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/d6/26/1ff2b0721ac66a3ec5b1402b333110b352ab0a8724052ac279a7b82d40c4/tenacity-9.2.1-py3-none-any.whl", hash = "sha256:9e56f17539296baab7beabb08b92f6ee3d7be92d8be72d763360677c2ad6580e", size = 32310, upload-time = "2026-10-07T12:13:00.102Z" },
+]
+
+[[package]]
 name = "truststore"
 version = "0.10.5"
 source = { registry = "https://pypi.org/simple" }
@@ -887,6 +898,25 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/67/41/d48d94925fa2e76b744628a9ac8c06002271b03181ee8e3f97bf804323f7/types_pytz-2026.6.0.20261031.tar.gz", hash = "sha256:8b559955f0c628f68159865c6f24835f4323c407a4408365b3676a074b524261", size = 11079, upload-time = "2026-10-31T07:39:13.265Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/1c/0b/b28f2d9eb28c36b331f37cfe8c7b118fe26dfc96101b316155d7cf60bd90/types_pytz-2026.6.0.20261031-py3-none-any.whl", hash = "sha256:d0d4fbe482edfb263440421866cba41d25daba37e5584e0cff6712a3b5a9d9e9", size = 10165, upload-time = "2026-10-31T07:39:12.391Z" },
+]
+
+[[package]]
+name = "typesafe-sdk"
+version = "0.7.6"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "anyio" },
+    { name = "httpx2" },
+    { name = "packaging" },
+    { name = "pydantic" },
+    { name = "pydantic-core" },
+    { name = "tenacity" },
+    { name = "truststore", marker = "sys_platform != 'emscripten'" },
+    { name = "typing-extensions" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/c0/79/a97acbe27941c8d07c69d3e86bc23621bc48f417d40d78d32efc0d61394e/typesafe_sdk-0.7.6.tar.gz", hash = "sha256:f2d9757bee46f7435c405ecb5763344b14daecd5043f176eac291a8b5ca33609", size = 34224, upload-time = "2026-11-25T10:50:27.02Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/7b/db/0aacea030d67eaa83fc7bf2ade814377794f7901c831677b651587d56014/typesafe_sdk-0.7.6-py3-none-any.whl", hash = "sha256:a558ed92367a1ff6bac9c69e072e845f730515cbd604e383da879b5b4a16371b", size = 50000, upload-time = "2026-11-25T10:50:25.853Z" },
 ]
 
 [[package]]

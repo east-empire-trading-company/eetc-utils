@@ -3,7 +3,7 @@ from typing import Any, Dict, List, Optional, Union
 import anthropic
 from anthropic.types import Message
 
-DEFAULT_MODEL = "claude-sonnet-5"
+DEFAULT_MODEL = "claude-sonnet-5-5"
 DEFAULT_MAX_TOKENS = 4096
 
 
